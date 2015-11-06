@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    module("Tuio.Container", {
+    QUnit.module("Tuio.Container", {
         setup: function() {
 
         },
@@ -9,25 +9,25 @@ $(document).ready(function() {
         }
     });
 
-    test("initialize with session id and position", function() {
+    QUnit.test("initialize with session id and position", function() {
         var container = new Tuio.Container({
             si: 1,
             xp: 10,
             yp: 20
         });
 
-        equal(container.getSessionId(), 1);
-        equal(container.getX(), 10);
-        equal(container.getY(), 20);
-        equal(container.getXSpeed(), 0);
-        equal(container.getYSpeed(), 0);
-        equal(container.getMotionSpeed(), 0);
-        equal(container.getMotionAccel(), 0);
-        equal(container.getPath().length, 1);
-        equal(container.getTuioState(), Tuio.Container.TUIO_ADDED);
+        QUnit.equal(container.getSessionId(), 1);
+        QUnit.equal(container.getX(), 10);
+        QUnit.equal(container.getY(), 20);
+        QUnit.equal(container.getXSpeed(), 0);
+        QUnit.equal(container.getYSpeed(), 0);
+        QUnit.equal(container.getMotionSpeed(), 0);
+        QUnit.equal(container.getMotionAccel(), 0);
+        QUnit.equal(container.getPath().length, 1);
+        QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_ADDED);
     });
 
-    test("update", function() {
+    QUnit.test("update", function() {
         var container = new Tuio.Container({
             ttime: new Tuio.Time(0, 0),
             si: 1,
@@ -41,14 +41,14 @@ $(document).ready(function() {
             yp: 0
         });
 
-        equal(container.getX(), 50);
-        equal(container.getY(), 0);
-        equal(container.getXSpeed(), 25);
-        equal(container.getYSpeed(), 0);
-        equal(container.getMotionSpeed(), 25);
-        equal(container.getMotionAccel(), 12.5);
-        equal(container.getPath().length, 2);
-        equal(container.getTuioState(), Tuio.Container.TUIO_ACCELERATING);
+        QUnit.equal(container.getX(), 50);
+        QUnit.equal(container.getY(), 0);
+        QUnit.equal(container.getXSpeed(), 25);
+        QUnit.equal(container.getYSpeed(), 0);
+        QUnit.equal(container.getMotionSpeed(), 25);
+        QUnit.equal(container.getMotionAccel(), 12.5);
+        QUnit.equal(container.getPath().length, 2);
+        QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_ACCELERATING);
 
         container.update({
             ttime: new Tuio.Time(3, 0),
@@ -56,10 +56,10 @@ $(document).ready(function() {
             yp: 0
         });
 
-        equal(container.getTuioState(), Tuio.Container.TUIO_DECELERATING);
+        QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_DECELERATING);
     });
 
-    test("update with velocity and acceleration", function() {
+    QUnit.test("update with velocity and acceleration", function() {
         var container = new Tuio.Container({
             ttime: new Tuio.Time(0, 0),
             si: 1,
@@ -76,16 +76,16 @@ $(document).ready(function() {
             ma: 12.5
         });
 
-        equal(container.getX(), 50);
-        equal(container.getY(), 0);
-        equal(container.getXSpeed(), 25);
-        equal(container.getYSpeed(), 0);
-        equal(container.getMotionAccel(), 12.5);
-        equal(container.getPath().length, 2);
-        equal(container.getTuioState(), Tuio.Container.TUIO_ACCELERATING);
+        QUnit.equal(container.getX(), 50);
+        QUnit.equal(container.getY(), 0);
+        QUnit.equal(container.getXSpeed(), 25);
+        QUnit.equal(container.getYSpeed(), 0);
+        QUnit.equal(container.getMotionAccel(), 12.5);
+        QUnit.equal(container.getPath().length, 2);
+        QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_ACCELERATING);
     });
 
-    test("stop", function() {
+    QUnit.test("stop", function() {
         var container = new Tuio.Container({
             ttime: new Tuio.Time(0, 0),
             si: 1,
@@ -101,13 +101,13 @@ $(document).ready(function() {
 
         container.stop(new Tuio.Time(3, 0));
 
-        equal(container.getX(), 50);
-        equal(container.getY(), 0);
-        equal(container.getMotionSpeed(), 0);
-        equal(container.getTuioState(), Tuio.Container.TUIO_DECELERATING);
+        QUnit.equal(container.getX(), 50);
+        QUnit.equal(container.getY(), 0);
+        QUnit.equal(container.getMotionSpeed(), 0);
+        QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_DECELERATING);
     });
 
-    test("remove", function() {
+    QUnit.test("remove", function() {
         var container = new Tuio.Container({
             si: 1,
             xp: 10,
@@ -116,11 +116,11 @@ $(document).ready(function() {
 
         container.remove(new Tuio.Time(2, 0));
 
-        equal(container.getTuioState(), Tuio.Container.TUIO_REMOVED);
+        QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_REMOVED);
         ok(container.getTuioTime().equals(new Tuio.Time(2, 0)));
     });
 
-    test("isMoving", function() {
+    QUnit.test("isMoving", function() {
         var container = new Tuio.Container({
             ttime: new Tuio.Time(0, 0),
             si: 1,

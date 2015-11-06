@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    module("Tuio.Client", {
+    QUnit.module("Tuio.Client", {
         setup: function() {
 
         },
@@ -14,6 +14,6 @@ $(document).ready(function() {
             host: "http://localhost:5000"
         });
 
-        equal(client.host, "http://localhost:5000");
+        QUnit.equal(client.host, "http://localhost:5000");
     });
 });

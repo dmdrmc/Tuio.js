@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    module("Tuio.Object", {
+    QUnit.module("Tuio.Object", {
         setup: function() {
 
         },
@@ -9,23 +9,23 @@ $(document).ready(function() {
         }
     });
 
-    test("construct", function() {
+    QUnit.test("construct", function() {
         var object = new Tuio.Object({
             sym: 2,
             a: Math.PI
         });
 
-        equal(object.getX(), 0);
-        equal(object.getY(), 0);
-        equal(object.getSymbolId(), 2);
-        equal(object.getAngle(), Math.PI);
-        equal(object.getAngleDegrees(), 180);
-        equal(object.getRotationSpeed(), 0);
-        equal(object.getRotationAccel(), 0);
+        QUnit.equal(object.getX(), 0);
+        QUnit.equal(object.getY(), 0);
+        QUnit.equal(object.getSymbolId(), 2);
+        QUnit.equal(object.getAngle(), Math.PI);
+        QUnit.equal(object.getAngleDegrees(), 180);
+        QUnit.equal(object.getRotationSpeed(), 0);
+        QUnit.equal(object.getRotationAccel(), 0);
         ok(!object.isMoving());
     });
 
-    test("update", function() {
+    QUnit.test("update", function() {
         var object = new Tuio.Object({
             ttime: new Tuio.Time(20, 0),
             xp: 0,
@@ -41,12 +41,12 @@ $(document).ready(function() {
             a: Math.PI
         });
 
-        equal(object.getX(), 0);
-        equal(object.getY(), 25);
-        equal(object.getAngleDegrees(), 180);
-        equal(object.getRotationSpeed(), 0.1);
-        equal(object.getRotationAccel(), 0.02);
-        equal(object.getTuioState(), Tuio.Object.TUIO_ROTATING);
+        QUnit.equal(object.getX(), 0);
+        QUnit.equal(object.getY(), 25);
+        QUnit.equal(object.getAngleDegrees(), 180);
+        QUnit.equal(object.getRotationSpeed(), 0.1);
+        QUnit.equal(object.getRotationAccel(), 0.02);
+        QUnit.equal(object.getTuioState(), Tuio.Object.TUIO_ROTATING);
         ok(object.isMoving());
 
         object.update({
@@ -56,12 +56,12 @@ $(document).ready(function() {
             ra: 0.001
         });
 
-        equal(object.getAngleDegrees(), 90);
-        equal(object.getRotationSpeed(), 0.05);
-        equal(object.getRotationAccel(), 0.001);
+        QUnit.equal(object.getAngleDegrees(), 90);
+        QUnit.equal(object.getRotationSpeed(), 0.05);
+        QUnit.equal(object.getRotationAccel(), 0.001);
     });
 
-    test("stop", function() {
+    QUnit.test("stop", function() {
         var object = new Tuio.Object({
             ttime: new Tuio.Time(20, 0),
             xp: 10,
@@ -81,10 +81,10 @@ $(document).ready(function() {
 
         object.stop(new Tuio.Time(50, 0));
 
-        equal(object.getX(), 20);
-        equal(object.getY(), 20);
-        equal(object.getAngle(), Math.PI / 2);
-        equal(object.getRotationSpeed(), 0);
+        QUnit.equal(object.getX(), 20);
+        QUnit.equal(object.getY(), 20);
+        QUnit.equal(object.getAngle(), Math.PI / 2);
+        QUnit.equal(object.getRotationSpeed(), 0);
         ok(object.getTuioTime().equals(new Tuio.Time(50, 0)));
     });
 });

@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    module("Tuio.Cursor", {
+    QUnit.module("Tuio.Cursor", {
         setup: function() {
 
         },
@@ -9,7 +9,7 @@ $(document).ready(function() {
         }
     });
 
-    test("construct", function() {
+    QUnit.test("construct", function() {
         var cursor = new Tuio.Cursor({
             ttime: new Tuio.Time(),
             si: 1,
@@ -18,19 +18,19 @@ $(document).ready(function() {
             yp: 20
         });
 
-        equal(cursor.getSessionId(), 1);
-        equal(cursor.getCursorId(), 5);
-        equal(cursor.getX(), 10);
-        equal(cursor.getY(), 20);
-        equal(cursor.getXSpeed(), 0);
-        equal(cursor.getYSpeed(), 0);
-        equal(cursor.getMotionSpeed(), 0);
-        equal(cursor.getMotionAccel(), 0);
-        equal(cursor.getPath().length, 1);
-        equal(cursor.getTuioState(), Tuio.Container.TUIO_ADDED);
+        QUnit.equal(cursor.getSessionId(), 1);
+        QUnit.equal(cursor.getCursorId(), 5);
+        QUnit.equal(cursor.getX(), 10);
+        QUnit.equal(cursor.getY(), 20);
+        QUnit.equal(cursor.getXSpeed(), 0);
+        QUnit.equal(cursor.getYSpeed(), 0);
+        QUnit.equal(cursor.getMotionSpeed(), 0);
+        QUnit.equal(cursor.getMotionAccel(), 0);
+        QUnit.equal(cursor.getPath().length, 1);
+        QUnit.equal(cursor.getTuioState(), Tuio.Container.TUIO_ADDED);
     });
 
-    test("fromCursor", function() {
+    QUnit.test("fromCursor", function() {
        var cursor1 = new Tuio.Cursor({
             ttime: new Tuio.Time(),
             si: 1,
@@ -41,15 +41,15 @@ $(document).ready(function() {
 
         cursor2 = Tuio.Cursor.fromCursor(cursor1);
 
-        equal(cursor2.getSessionId(), 1);
-        equal(cursor2.getCursorId(), 5);
-        equal(cursor2.getX(), 10);
-        equal(cursor2.getY(), 20);
-        equal(cursor2.getXSpeed(), 0);
-        equal(cursor2.getYSpeed(), 0);
-        equal(cursor2.getMotionSpeed(), 0);
-        equal(cursor2.getMotionAccel(), 0);
-        equal(cursor2.getPath().length, 1);
-        equal(cursor2.getTuioState(), Tuio.Container.TUIO_ADDED);
+        QUnit.equal(cursor2.getSessionId(), 1);
+        QUnit.equal(cursor2.getCursorId(), 5);
+        QUnit.equal(cursor2.getX(), 10);
+        QUnit.equal(cursor2.getY(), 20);
+        QUnit.equal(cursor2.getXSpeed(), 0);
+        QUnit.equal(cursor2.getYSpeed(), 0);
+        QUnit.equal(cursor2.getMotionSpeed(), 0);
+        QUnit.equal(cursor2.getMotionAccel(), 0);
+        QUnit.equal(cursor2.getPath().length, 1);
+        QUnit.equal(cursor2.getTuioState(), Tuio.Container.TUIO_ADDED);
     });
 });
