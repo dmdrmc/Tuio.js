@@ -1,3 +1,13 @@
+(function(root) {
+
+var Tuio = root.Tuio,
+    _ = root._;
+
+if (typeof require !== "undefined") {
+    Tuio = require("./Tuio");
+    _ = require('lodash');
+}
+
 Tuio.Client = Tuio.Model.extend({
     host: null,
     socket: null,
@@ -487,3 +497,9 @@ Tuio.Client = Tuio.Model.extend({
         this.trigger("updateTuioCursor", updateCursor);
     }
 });
+    
+if (typeof exports !== "undefined") {
+    module.exports = Tuio.Client;
+}
+    
+}(this));

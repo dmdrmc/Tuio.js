@@ -1,3 +1,12 @@
+(function(root) {
+
+var Tuio = root.Tuio;
+
+if (typeof require !== "undefined") {
+    Tuio = require("./Tuio");
+    Tuio.Point = require("./TuioPoint");
+}
+
 Tuio.Container = Tuio.Point.extend({
     sessionId: null,
     xSpeed: null,
@@ -146,3 +155,9 @@ Tuio.Container = Tuio.Point.extend({
         });
     }
 });
+    
+if (typeof exports !== "undefined") {
+    module.exports = Tuio.Container;
+}
+    
+}(this));

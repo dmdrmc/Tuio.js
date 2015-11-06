@@ -1,3 +1,11 @@
+(function(root) {
+
+var Tuio = root.Tuio;
+
+if (typeof require !== "undefined") {
+    Tuio = require("./Tuio");
+}
+
 Tuio.Time = Tuio.Model.extend({
     seconds: 0,
     microSeconds: 0,
@@ -114,3 +122,9 @@ Tuio.Time = Tuio.Model.extend({
         );
     }
 });
+    
+if (typeof exports !== "undefined") {
+    module.exports = Tuio.Time;
+}
+    
+}(this));

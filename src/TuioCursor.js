@@ -1,3 +1,12 @@
+(function(root) {
+
+var Tuio = root.Tuio;
+
+if (typeof require !== "undefined") {
+    Tuio = require("./Tuio");
+    Tuio.Container = require("./TuioContainer");
+}
+
 Tuio.Cursor = Tuio.Container.extend({
     cursorId: null,
 
@@ -20,3 +29,9 @@ Tuio.Cursor = Tuio.Container.extend({
         });
     }
 });
+    
+if (typeof exports !== "undefined") {
+    module.exports = Tuio.Cursor;
+}
+    
+}(this));

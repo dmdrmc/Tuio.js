@@ -1,3 +1,11 @@
+(function(root) {
+
+var Tuio = root.Tuio;
+
+if (typeof require !== "undefined") {
+    Tuio = require("./Tuio");
+}
+
 Tuio.Point = Tuio.Model.extend({
     xPos: null,
     yPos: null,
@@ -90,3 +98,9 @@ Tuio.Point = Tuio.Model.extend({
         });
     }
 });
+    
+if (typeof exports !== "undefined") {
+    module.exports = Tuio.Point;
+}
+    
+}(this));

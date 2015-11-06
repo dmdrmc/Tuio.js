@@ -1,4 +1,5 @@
 (function(root) {
+    
     // Initial Setup, events mixin and extend/inherits taken from Backbone.js
     // See Backbone.js source for original version and comments.
 
