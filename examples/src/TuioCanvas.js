@@ -1,3 +1,6 @@
+var Tuio = require("../../src/Tuio");
+    Tuio.Client = require("../../src/TuioClient");
+
 var TuioCanvas = {
     init: function() {
         this.Main.init();
@@ -88,3 +91,8 @@ TuioCanvas.Main = (function() {
         init: init
     };
 }());
+
+
+$(function() {
+    TuioCanvas.init();
+});
