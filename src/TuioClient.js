@@ -1,11 +1,13 @@
 (function(root) {
 
 var Tuio = root.Tuio,
+    io = root.io,
     _ = root._;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
-    _ = require('lodash');
+    _ = require("lodash");
+    io = require("socket.io-client");
 }
 
 Tuio.Client = Tuio.Model.extend({
