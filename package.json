@@ -7,7 +7,8 @@
   },
   "scripts": {
     "test": "karma start --single-run",
-    "build:common": "browserify src/* -u src/server.js -o dist/Tuio.common.js"
+    "build:common": "browserify src/* -u src/server.js -o dist/Tuio.common.js --no-bundle-external",
+    "build:canvas": "browserify src/* examples/src/TuioCanvas.js -u src/server.js -o examples/src/TuioCanvas.bundle.js"
   },
   "licenses": [
     {
@@ -18,7 +19,8 @@
   "dependencies": {
     "tuio": "~1.0.0",
     "lodash": "~3.10.1",
-    "express": "2.5.9"
+    "express": "2.5.9",
+    "socket.io-client": "~0.9.17"
   },
   "devDependencies": {
     "browserify": "^12.0.1",
@@ -28,7 +30,6 @@
     "karma-phantomjs-launcher": "^0.2.1",
     "karma-qunit": "^0.1.8",
     "phantomjs": "^1.9.18",
-    "qunitjs": "^1.20.0",
-    "socket.io-client": "~0.9.6"
+    "qunitjs": "^1.20.0"
   }
 }
