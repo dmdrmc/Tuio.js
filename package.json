@@ -8,7 +8,7 @@
   "scripts": {
     "test": "karma start --single-run",
     "build:common": "browserify src/* -u src/server.js -o dist/Tuio.common.js --no-bundle-external",
-    "build:canvas": "browserify src/* examples/src/TuioCanvas.js -u src/server.js -o examples/src/TuioCanvas.bundle.js"
+    "build:canvas": "watchify src/* examples/src/TuioCanvas.js -u src/server.js -o examples/src/TuioCanvas.bundle.js -v"
   },
   "licenses": [
     {
@@ -29,7 +29,9 @@
     "karma-mocha-reporter": "^1.1.1",
     "karma-phantomjs-launcher": "^0.2.1",
     "karma-qunit": "^0.1.8",
+    "osc": "^2.0.0",
     "phantomjs": "^1.9.18",
-    "qunitjs": "^1.20.0"
+    "qunitjs": "^1.20.0",
+    "watchify": "^3.6.0"
   }
 }
