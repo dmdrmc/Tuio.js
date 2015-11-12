@@ -4,3 +4,4 @@
 !node_modules
 node_modules/*
 !node_modules/tuio
+node_modules/tuio/node_modules
