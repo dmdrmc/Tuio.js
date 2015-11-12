@@ -113,8 +113,6 @@ Tuio.Client = Tuio.Model.extend({
             messageArgs = oscMessage.args,
             command = messageArgs[0],
             args = messageArgs.slice(1, messageArgs.length);
-        
-            console.log(command, args);
 
         switch (address) {
             case "/tuio/2Dobj":
