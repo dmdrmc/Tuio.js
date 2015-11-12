@@ -2,12 +2,13 @@
 
 var Tuio = root.Tuio,
     io = root.io,
-    _ = root._;
+    _ = root._,
+    osc = root.osc;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
     _ = require("lodash");
-    io = require("socket.io-client");
+    osc = require("osc/dist/osc-browser");
 }
 
 Tuio.Client = Tuio.Model.extend({
@@ -26,6 +27,7 @@ Tuio.Client = Tuio.Model.extend({
     maxCursorId: null,
     currentFrame: null,
     currentTime: null,
+    oscReceiver: null,
 
     initialize: function(params) {
         this.host = params.host;
@@ -42,22 +44,24 @@ Tuio.Client = Tuio.Model.extend({
         this.maxCursorId = -1;
         this.currentFrame = 0;
         this.currentTime = null;
+        this.oscReceiver = new osc.WebSocketPort({
+            url: this.host
+        });
 
-        _.bindAll(this, "onConnect", "acceptBundle", "onDisconnect");
+        _.bindAll(this, "onConnect", "acceptBundle", "acceptMessage", "onDisconnect");
     },
 
     connect: function() {
         Tuio.Time.initSession();
         this.currentTime = new Tuio.Time();
         this.currentTime.reset();
-
-        this.socket = io.connect(this.host);
-        this.socket.on("connect", this.onConnect);
-        this.socket.on("disconnect", this.onDisconnect);
+        
+        this.oscReceiver.open();
+        this.oscReceiver.on("open", this.onConnect);
     },
 
     onConnect: function() {
-        this.socket.on("osc", this.acceptBundle);
+        this.oscReceiver.on("message", this.acceptMessage);
         this.connected = true;
         this.trigger("connect");
     },
@@ -86,10 +90,13 @@ Tuio.Client = Tuio.Model.extend({
     getTuioCursor: function(sid) {
         return this.cursorList[sid];
     },
-
+    /**
+     * @deprecated osc.js can decode bundles into messages and call the .on("message") listeners
+     */
     acceptBundle: function(oscBundle) {
-        var msg = null;
-
+        var msg = null,
+            oscBundle = [];
+        
         for (var i = 0, max = oscBundle.length; i < max; i++) {
             msg = oscBundle[i];
             switch (msg[0]) {
@@ -102,9 +109,12 @@ Tuio.Client = Tuio.Model.extend({
     },
 
     acceptMessage: function(oscMessage) {
-        var address = oscMessage[0],
-        command = oscMessage[1],
-        args = oscMessage.slice(2, oscMessage.length);
+        var address = oscMessage.address,
+            messageArgs = oscMessage.args,
+            command = messageArgs[0],
+            args = messageArgs.slice(1, messageArgs.length);
+        
+            console.log(command, args);
 
         switch (address) {
             case "/tuio/2Dobj":
