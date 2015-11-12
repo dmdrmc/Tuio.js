@@ -20082,6 +20082,7 @@ Tuio.Client = Tuio.Model.extend({
         
         this.oscReceiver.open();
         this.oscReceiver.on("open", this.onConnect);
+        this.oscReceiver.on("close", this.onDisconnect);
     },
 
     onConnect: function() {
@@ -20091,6 +20092,7 @@ Tuio.Client = Tuio.Model.extend({
     },
 
     onDisconnect: function() {
+        this.oscReceiver.removeListener("message", this.acceptMessage);
         this.connected = false;
         this.trigger("disconnect");
     },
