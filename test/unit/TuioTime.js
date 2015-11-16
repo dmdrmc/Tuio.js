@@ -1,5 +1,5 @@
-var Tuio = require("../src/Tuio");
-Tuio.Time = require("../src/TuioTime");
+var Tuio = require("../../src/Tuio");
+Tuio.Time = require("../../src/TuioTime");
 
 QUnit.module("Tuio.Time", {
     setup: function() {

@@ -1,5 +1,5 @@
-var Tuio = require("../src/Tuio");
-Tuio.Point = require("../src/TuioPoint");
+var Tuio = require("../../src/Tuio");
+Tuio.Point = require("../../src/TuioPoint");
 
 QUnit.module("Tuio.Point", {
     setup: function() {

@@ -1,5 +1,5 @@
-var Tuio = require("../src/Tuio");
-Tuio.Client = require("../src/TuioClient");
+var Tuio = require("../../src/Tuio");
+Tuio.Client = require("../../src/TuioClient");
 
 QUnit.module("Tuio.Client", {
     setup: function() {

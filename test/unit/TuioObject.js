@@ -1,5 +1,5 @@
-var Tuio = require("../src/Tuio");
-Tuio.Object = require("../src/TuioObject");
+var Tuio = require("../../src/Tuio");
+Tuio.Object = require("../../src/TuioObject");
 
 QUnit.module("Tuio.Object", {
     setup: function() {

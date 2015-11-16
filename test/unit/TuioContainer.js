@@ -1,5 +1,5 @@
-var Tuio = require("../src/Tuio");
-Tuio.Container = require("../src/TuioContainer");
+var Tuio = require("../../src/Tuio");
+Tuio.Container = require("../../src/TuioContainer");
 
 QUnit.module("Tuio.Container", {
     setup: function() {

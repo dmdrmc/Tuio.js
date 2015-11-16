@@ -1,5 +1,5 @@
-var Tuio = require("../src/Tuio");
-Tuio.Cursor = require("../src/TuioCursor");
+var Tuio = require("../../src/Tuio");
+Tuio.Cursor = require("../../src/TuioCursor");
 
 QUnit.module("Tuio.Cursor", {
     setup: function() {
