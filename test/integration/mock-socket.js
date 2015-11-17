@@ -3,15 +3,19 @@
 var realWebSocket,
     serverInstance,
     clientInstance;
+    
+var Tuio = require("../../src/Tuio");
+Tuio.Client = require("../../src/TuioClient");
 
 QUnit.module("Integration: mock-socket", {
     setup: function() {
+        var connectionUrl = "test-url";
         // replace WebSocket constructor for each test
         realWebSocket = WebSocket;
-        WebSocket = MockWebSocket;
+        window.WebSocket = MockWebSocket;
         // setup
-        serverInstance = new MockServer("test-url");
-        clientInstance = new WebSocket("test-url");
+        serverInstance = new MockServer(connectionUrl);
+        clientInstance = new WebSocket(connectionUrl);
     },
 
     teardown: function() {
@@ -28,9 +32,19 @@ QUnit.test("MockWebSocket and MockServer globally available in tests", function(
     QUnit.ok( MockServer, "mock-socket server not loaded");
 });
 
-QUnit.test("MockSocket replaces WebSocket constructor", function() {
+QUnit.test("Mocked WebSocket replaces WebSocket constructor", function() {
     
     QUnit.equal( MockWebSocket, WebSocket, "mock-socket didn't replace WebSocket");
+});
+    
+QUnit.test("Mocked WebSocket has open readyState", function(assert) {
+    
+    var done = assert.async();
+    
+    setTimeout( function() {
+        QUnit.equal( clientInstance.readyState, WebSocket.OPEN, "mocked WebSocket connection not open" );
+        done();
+    }, 10);
 });
 
 QUnit.test("Mocked WebSocket can receive messages from MockServer", function(assert) {
@@ -55,6 +69,17 @@ QUnit.test("Mocked WebSocket can receive ArrayBuffer data", function() {
     
     binaryDataArray[0] = 1;
     serverInstance.send(binaryDataBuffer);
+});
+    
+QUnit.test("Tuio.Client/oscReceiver instantiates a mocked WebSocket", function() {
+    
+    var client = new Tuio.Client({
+        host: "test-url"
+    });
+    
+    client.connect();
+    
+    QUnit.ok( client.oscReceiver.socket instanceof MockWebSocket );
 });
     
 })();
