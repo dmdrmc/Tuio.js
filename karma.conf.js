@@ -2,6 +2,7 @@
 // Generated on Fri Nov 06 2015 12:43:05 GMT+0100 (CET)
 
 module.exports = function(config) {
+    
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -16,7 +17,8 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'test/**/*.js',
-      'src/**/*.js'
+      'src/**/*.js',
+      require.resolve('mock-socket')
     ],
 
 
@@ -59,7 +61,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: ['Chrome'],
 
 
     // Continuous Integration mode
