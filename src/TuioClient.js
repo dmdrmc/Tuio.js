@@ -123,6 +123,9 @@ Tuio.Client = Tuio.Model.extend({
             case "/tuio/2Dcur":
                 this.handleCursorMessage(command, args);
                 break;
+            case "/tuio2/ptr":
+                this.handlePointerMessage(messageArgs);
+                break;
         }
     },
 
@@ -152,6 +155,24 @@ Tuio.Client = Tuio.Model.extend({
                 this.cursorFseq(args);
                 break;
         }
+    },
+    
+    handlePointerMessage: function(args) {
+        var s_id = args[0],
+            // TODO
+            // split tu_id into 16-bit t_id u_id
+            // make sure tu_id hasn't already been converted into a javascript double number
+            tu_id = args[1],
+            c_id = args[2],
+            x_pos = args[3],
+            y_pos = args[4],
+            angle = args[5],
+            shear = args[6],
+            radius = args[7],
+            pressure = args[8];
+        
+        // fake it atm
+        this.frameCursors.push({});
     },
 
     objectSet: function(args) {
