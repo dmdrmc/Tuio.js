@@ -170,22 +170,31 @@ QUnit.test("keeps track of Tuio1 cursors", function(assert) {
 QUnit.test("keeps track of Tuio2 pointers", function(assert) {
     
     var asyncDone = assert.async(),
-        arrayBuffer;
+        arrayBuffer,
+        pointerInstance;
     
     client.connect();
     
     arrayBuffer = writeOscMessage("/tuio2/ptr", [
+        //session id
         {type: "i", value: 1},
         //tu_id, two 16-bit values
-        //t_id => 2, u_id => 3
-        // 0x00 0x02 0x00 0x03 => big endian 131075
-        {type: "i", value: 131075},
+        //t_id => 15, u_id => 7
+        // 0x00 0x0f 0x00 0x07 => big endian 983047
+        {type: "i", value: 983047},
+        // component id
         {type: "i", value: 4},
+        // x_pos
         {type: "f", value: 5},
+        // y_pos
         {type: "f", value: 6},
+        // angle
         {type: "f", value: 7},
+        // shear
         {type: "f", value: 8},
+        // radius
         {type: "f", value: 9},
+        // pressure
         {type: "f", value: 10},
     ]);
     
@@ -193,7 +202,22 @@ QUnit.test("keeps track of Tuio2 pointers", function(assert) {
     
     setTimeout( function() {
         server.send(arrayBuffer);
+        //check if anything in the framecursors array
         QUnit.equal(client.frameCursors.length, 1, "Tuio.Client did not recognize a pointer message")
+        //check the actual content
+        pointerInstance = client.frameCursors[0];
+        
+        QUnit.equal(pointerInstance.getPointerId(), -1);
+        QUnit.equal(pointerInstance.getTypeId(), 15);
+        QUnit.equal(pointerInstance.getUserId(), 7);
+        QUnit.equal(pointerInstance.getSessionId(), 1);
+        QUnit.equal(pointerInstance.getX(), 5);
+        QUnit.equal(pointerInstance.getY(), 6);
+        QUnit.equal(pointerInstance.getAngle(), 7);
+        QUnit.equal(pointerInstance.getShear(), 8);
+        QUnit.equal(pointerInstance.getRadius(), 9);
+        QUnit.equal(pointerInstance.getPressure(), 10);
+        
         asyncDone();
     }, 10);
 });

@@ -171,8 +171,20 @@ Tuio.Client = Tuio.Model.extend({
             radius = args[7],
             pressure = args[8];
         
-        // fake it atm
-        this.frameCursors.push({});
+        var pointer = new Tuio.Pointer({
+            si: s_id,
+            pi: -1,
+            xp: x_pos,
+            yp: y_pos,
+            a: angle,
+            sa: shear,
+            r: radius,
+            p: pressure
+        });
+        
+        pointer.setTypeUserId(tu_id);
+        
+        this.frameCursors.push(pointer);
     },
 
     objectSet: function(args) {

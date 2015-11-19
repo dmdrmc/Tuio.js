@@ -53,8 +53,16 @@ Tuio.Pointer = Tuio.Container.extend({
     },
     getPressure: function() {
         return this.pressure;
+    },
+    setTypeUserId: function(tu_id) {
+        var arrayBuffer = new ArrayBuffer(4),
+            bufferView = new DataView(arrayBuffer);
+        
+        bufferView.setUint32(0, tu_id);
+        this.typeId = bufferView.getUint16(0);
+        this.userId = bufferView.getUint16(2);
     }
-}, {
+}, { 
     fromPointer: function(tptr) {
         return new Tuio.Pointer({
             si: tptr.getSessionId(),
