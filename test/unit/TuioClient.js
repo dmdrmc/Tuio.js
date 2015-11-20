@@ -9,7 +9,8 @@ function writeOscMessage(address, args) {
     
     var arrayBuffer = new ArrayBuffer(1000),
         bufferView = new DataView(arrayBuffer),
-        index = 0;
+        index = 0,
+        args = args || [];
     
     function writeString(characters) {
         var ui8View = new Uint8Array(arrayBuffer);
@@ -223,23 +224,56 @@ QUnit.test("keeps track of Tuio2 pointers", function(assert) {
     }, 10);
 });
     
-//QUnit.test("keeps track of alive Tuio2 objects", function(assert) {
-//    
-//    var asyncDone = assert.async(),
-//        alivePointersBuffer;
-//    
-//    alivePointersBuffer = writeOscMessage("/tuio2/alv", [
-//        {type: "i", value: 1},
-//        {type: "i", value: 2},
-//        {type: "i", value: 3},
-//        {type: "f", value: 4}
-//    ]);
-//    
-//    QUnit.equal(client.alivePointerList.length, 0, "alivePointerList is empty or undefined")
-//    
-//    setTimeout(function() {
-//        server.send(getTuioAlivePointers);
-//    }, 10);
-//}) 
+QUnit.test("keeps track of one alive Tuio2 component", function(assert) {
+    
+    var asyncDone = assert.async(),
+        aliveComponentsBuffer,
+        aliveComponentsList = client.getAliveComponents();
+    
+    client.connect();
+    
+    aliveComponentsBuffer = writeOscMessage("/tuio2/alv", [
+        {type: "i", value: 1},
+    ]);
+    
+    QUnit.equal(aliveComponentsList.length, 0, "alive component not initialized or not empty");
+    
+    setTimeout(function() {
+        server.send(aliveComponentsBuffer);
+    
+        QUnit.equal(aliveComponentsList.length, 1, "alive component does not contain one item");
+        QUnit.equal(aliveComponentsList[0], 1, "alive component has the wrong session id");
+        
+        asyncDone();
+    }, 10);
+});
+    
+QUnit.test("keeps track of multiple alive Tuio2 components", function(assert) {
+    
+    var asyncDone = assert.async(),
+        aliveComponentsBuffer,
+        aliveComponentsList = client.getAliveComponents();
+    
+    client.connect();
+    
+    aliveComponentsBuffer = writeOscMessage("/tuio2/alv", [
+        {type: "i", value: 1},
+        {type: "i", value: 3},
+        {type: "i", value: 2},
+    ]);
+    
+    QUnit.equal(aliveComponentsList.length, 0, "alive component not initialized or not empty");
+    
+    setTimeout(function() {
+        server.send(aliveComponentsBuffer);
+    
+        QUnit.equal(aliveComponentsList.length, 3, "alive component does not contain three items");
+        QUnit.equal(aliveComponentsList[0], 1, "alive component has the wrong session id");
+        QUnit.equal(aliveComponentsList[1], 3, "alive component has the wrong session id");
+        QUnit.equal(aliveComponentsList[2], 2, "alive component has the wrong session id");
+        
+        asyncDone();
+    }, 10);
+});
 
 })();
