@@ -28,6 +28,7 @@ Tuio.Client = Tuio.Model.extend({
     //tuio2/any-component
     aliveComponentList: null,
     //tuio2/ptr
+    pointerList: null,
     framePointers: null,
     //
     freeCursorList: null,
@@ -52,6 +53,7 @@ Tuio.Client = Tuio.Model.extend({
         //tuio2/any-component
         this.aliveComponentList = [];
         //tuio2/ptr
+        this.pointerList = [];
         this.framePointers = [];
         //
         this.freeCursorList = [];
@@ -97,6 +99,10 @@ Tuio.Client = Tuio.Model.extend({
 
     getTuioCursors: function() {
         return _.clone(this.cursorList);
+    },
+    
+    getTuioPointers: function() {
+        return _.clone(this.pointerList);
     },
 
     getTuioObject: function(sid) {
@@ -174,9 +180,22 @@ Tuio.Client = Tuio.Model.extend({
         }
     },
     
-    handleAliveMessage: function(args) {
-        if (typeof args.length !== "undefined" )
-            this.aliveComponentList.push.apply(this.aliveComponentList, args);
+    handleAliveMessage: function(args) {        
+        args = args || [];
+        var self = this;
+        
+        this.aliveComponentList = [];
+        if (typeof args.length !== "undefined") {
+            [].push.apply(this.aliveComponentList, args);
+        }
+        
+        this.framePointers.forEach(function(pointer){
+            switch(pointer.getTuioState()) {
+                case Tuio.Object.TUIO_ADDED:
+                    self.pointerList.push(pointer);
+                    break;
+            }
+        })
     },
     
     getAliveComponents: function() {
@@ -217,7 +236,6 @@ Tuio.Client = Tuio.Model.extend({
         return this.framePointers;
     },
     
-    // not tuio2 pointers
     objectSet: function(args) {
         var sid = args[0],
         cid = args[1],
