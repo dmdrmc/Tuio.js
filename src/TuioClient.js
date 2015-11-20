@@ -15,14 +15,19 @@ Tuio.Client = Tuio.Model.extend({
     host: null,
     socket: null,
     connected: null,
+    //tuio2Dobj
     objectList: null,
     aliveObjectList: null,
     newObjectList: null,
+    frameObjects: null,
+    //tuio/2Dcur
     cursorList: null,
     aliveCursorList: null,
     newCursorList: null,
-    frameObjects: null,
     frameCursors: null,
+    //tuio2/ptr
+    framePointers: null,
+    //
     freeCursorList: null,
     maxCursorId: null,
     currentFrame: null,
@@ -32,14 +37,19 @@ Tuio.Client = Tuio.Model.extend({
     initialize: function(params) {
         this.host = params.host;
         this.connected = false;
+        //tuio/2Dobj
         this.objectList = {};
         this.aliveObjectList = [];
         this.newObjectList = [];
+        this.frameObjects = [];
+        //tuio/2Dcur
         this.cursorList = {};
         this.aliveCursorList = [];
         this.newCursorList = [];
-        this.frameObjects = [];
         this.frameCursors = [];
+        //tuio2/ptr
+        this.framePointers = [];
+        //
         this.freeCursorList = [];
         this.maxCursorId = -1;
         this.currentFrame = 0;
@@ -159,9 +169,6 @@ Tuio.Client = Tuio.Model.extend({
     
     handlePointerMessage: function(args) {
         var s_id = args[0],
-            // TODO
-            // split tu_id into 16-bit t_id u_id
-            // make sure tu_id hasn't already been converted into a javascript double number
             tu_id = args[1],
             c_id = args[2],
             x_pos = args[3],
@@ -184,7 +191,11 @@ Tuio.Client = Tuio.Model.extend({
         
         pointer.setTypeUserId(tu_id);
         
-        this.frameCursors.push(pointer);
+        this.framePointers.push(pointer);
+    },
+    
+    getFramePointers: function() {
+        return this.framePointers;
     },
 
     objectSet: function(args) {

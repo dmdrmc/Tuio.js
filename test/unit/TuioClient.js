@@ -171,6 +171,7 @@ QUnit.test("keeps track of Tuio2 pointers", function(assert) {
     
     var asyncDone = assert.async(),
         arrayBuffer,
+        framePointers = client.getFramePointers(),
         pointerInstance;
     
     client.connect();
@@ -198,14 +199,14 @@ QUnit.test("keeps track of Tuio2 pointers", function(assert) {
         {type: "f", value: 10},
     ]);
     
-    QUnit.equal(client.frameCursors.length, 0, "frameCursor length was not initially zero");
+    QUnit.equal(framePointers.length, 0, "frameCursor length was not initially zero");
     
     setTimeout( function() {
         server.send(arrayBuffer);
         //check if anything in the framecursors array
-        QUnit.equal(client.frameCursors.length, 1, "Tuio.Client did not recognize a pointer message")
+        QUnit.equal(framePointers.length, 1, "Tuio.Client did not recognize a pointer message")
         //check the actual content
-        pointerInstance = client.frameCursors[0];
+        pointerInstance = framePointers[0];
         
         QUnit.equal(pointerInstance.getPointerId(), -1);
         QUnit.equal(pointerInstance.getTypeId(), 15);
@@ -221,5 +222,24 @@ QUnit.test("keeps track of Tuio2 pointers", function(assert) {
         asyncDone();
     }, 10);
 });
+    
+//QUnit.test("keeps track of alive Tuio2 objects", function(assert) {
+//    
+//    var asyncDone = assert.async(),
+//        alivePointersBuffer;
+//    
+//    alivePointersBuffer = writeOscMessage("/tuio2/alv", [
+//        {type: "i", value: 1},
+//        {type: "i", value: 2},
+//        {type: "i", value: 3},
+//        {type: "f", value: 4}
+//    ]);
+//    
+//    QUnit.equal(client.alivePointerList.length, 0, "alivePointerList is empty or undefined")
+//    
+//    setTimeout(function() {
+//        server.send(getTuioAlivePointers);
+//    }, 10);
+//}) 
 
 })();
