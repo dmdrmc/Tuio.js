@@ -4,7 +4,7 @@ var Tuio = require("../../src/Tuio");
 Tuio.Client = require("../../src/TuioClient");
 var client,
     server,
-    osc = require("osc/dist/osc-browser");;
+    osc = require("osc/dist/osc-browser");
     
 function writeOscMessage(address, args) {
     
