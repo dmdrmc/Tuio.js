@@ -96,6 +96,35 @@ function getExamplePointerBuffer(params) {
     ]);
 }
     
+function getExampleAliveBuffer(sessionIds) {
+    sessionIds = sessionIds || [];
+    var oscArgs = sessionIds.map(function(id) {
+        return {
+            type: "i",
+            value: id
+        }
+    });
+    
+    return writeOscMessage("/tuio2/alv", oscArgs);
+}
+    
+function getExampleFrameBuffer(params) {
+    params = params || {};
+    var time = params.time || new Date().getTime(),
+        frameId = params.frameId;
+    
+    return writeOscMessage("/tuio2/frm", [
+        // frame id
+        {type: "i", value: frameId},
+        // time
+        {type: "t", value: time},
+        // dimension 640x480
+        {type: "i", value: 41943520},
+        // source string
+        {type: "s", value: "name:1@address"}
+    ]);
+}
+    
 function assertExamplePointer(pointerInstance, params) {
     params = params || {};
     var sessionId = params.sessionId || 1;
@@ -254,16 +283,10 @@ QUnit.test("stores a source from the frame message", function(assert) {
     
     client.connect();
     
-    frameMessageBuffer = writeOscMessage("/tuio2/frm", [
-        // frame id
-        {type: "i", value: 1},
-        // time
-        {type: "t", value: time},
-        // dimension 640x480
-        {type: "i", value: 41943520},
-        // source string
-        {type: "s", value: "name:1@address"}
-    ]);
+    frameMessageBuffer = getExampleFrameBuffer({
+        time: time,
+        frameId: 1
+    });
     
     QUnit.strictEqual(Object.keys(client.sourceList).length, 0,
                     "sourceList was undefined or not empty");
@@ -292,16 +315,10 @@ QUnit.test("updates source frame time on new frame", function(assert) {
     
     client.connect();
     
-    frameMessageBuffer = writeOscMessage("/tuio2/frm", [
-        // frame id
-        {type: "i", value: 1},
-        // time
-        {type: "t", value: time},
-        // dimension 640x480
-        {type: "i", value: 41943520},
-        // source string
-        {type: "s", value: "name:1@address"}
-    ]);
+    frameMessageBuffer = getExampleFrameBuffer({
+        frameId: 1,
+        time: time
+    });
     
     setTimeout(function(){
         server.send(frameMessageBuffer);
@@ -321,27 +338,15 @@ QUnit.test("makes a check for late frames", function(assert) {
     
     client.connect();
     
-    frameMessageBuffer = writeOscMessage("/tuio2/frm", [
-        // frame id
-        {type: "i", value: 2},
-        // time
-        {type: "t", value: time},
-        // dimension 640x480
-        {type: "i", value: 41943520},
-        // source string
-        {type: "s", value: "name:1@address"}
-    ]);
+    frameMessageBuffer = getExampleFrameBuffer({
+        time: time,
+        frameId: 2
+    });
     
-    lateFrameMessageBuffer = writeOscMessage("/tuio2/frm", [
-        // frame id
-        {type: "i", value: 1},
-        // time
-        {type: "t", value: time},
-        // dimension 640x480
-        {type: "i", value: 41943520},
-        // source string
-        {type: "s", value: "name:1@address"}
-    ]);
+    lateFrameMessageBuffer = getExampleFrameBuffer({
+        time: time,
+        frameId: 1
+    });
     
     setTimeout(function(){
         server.send(frameMessageBuffer);
@@ -362,27 +367,15 @@ QUnit.test("makes NO check for late frames if they are very late", function(asse
     
     client.connect();
     
-    frameMessageBuffer = writeOscMessage("/tuio2/frm", [
-        // frame id
-        {type: "i", value: 2},
-        // time
-        {type: "t", value: time},
-        // dimension 640x480
-        {type: "i", value: 41943520},
-        // source string
-        {type: "s", value: "name:1@address"}
-    ]);
+    frameMessageBuffer = getExampleFrameBuffer({
+        time: time,
+        frameId: 2
+    });
     
-    lateFrameMessageBuffer = writeOscMessage("/tuio2/frm", [
-        // frame id
-        {type: "i", value: 1},
-        // time
-        {type: "t", value: time2},
-        // dimension 640x480
-        {type: "i", value: 41943520},
-        // source string
-        {type: "s", value: "name:1@address"}
-    ]);
+    lateFrameMessageBuffer = getExampleFrameBuffer({
+        time: time2,
+        frameId: 2
+    });
     
     setTimeout(function(){
         server.send(frameMessageBuffer);
@@ -402,27 +395,15 @@ QUnit.test("makes NO check for late frames if frame ID reserved 0", function(ass
     
     client.connect();
     
-    frameMessageBuffer = writeOscMessage("/tuio2/frm", [
-        // frame id
-        {type: "i", value: 2},
-        // time
-        {type: "t", value: time},
-        // dimension 640x480
-        {type: "i", value: 41943520},
-        // source string
-        {type: "s", value: "name:1@address"}
-    ]);
+    frameMessageBuffer = getExampleFrameBuffer({
+        time: time,
+        frameId: 2
+    });
     
-    lateFrameMessageBuffer = writeOscMessage("/tuio2/frm", [
-        // frame id
-        {type: "i", value: 0},
-        // time
-        {type: "t", value: time2},
-        // dimension 640x480
-        {type: "i", value: 41943520},
-        // source string
-        {type: "s", value: "name:1@address"}
-    ]);
+    lateFrameMessageBuffer = getExampleFrameBuffer({
+        time: time2,
+        frameId: 0
+    });
     
     setTimeout(function(){
         server.send(frameMessageBuffer);
@@ -441,9 +422,7 @@ QUnit.test("keeps track of one alive Tuio2 session", function(assert) {
     
     client.connect();
     
-    aliveSessionsBuffer = writeOscMessage("/tuio2/alv", [
-        {type: "i", value: 1},
-    ]);
+    aliveSessionsBuffer = getExampleAliveBuffer([1]);
     
     QUnit.equal(client.getAliveComponents().length, 0,
                 "alive session not initialized or not empty");
@@ -467,11 +446,7 @@ QUnit.test("keeps track of multiple alive Tuio2 sessions", function(assert) {
     
     client.connect();
     
-    aliveSessionsBuffer = writeOscMessage("/tuio2/alv", [
-        {type: "i", value: 1},
-        {type: "i", value: 3},
-        {type: "i", value: 2},
-    ]);
+    aliveSessionsBuffer = getExampleAliveBuffer([1, 3, 2]);
     
     QUnit.equal(client.getAliveComponents().length, 0,
                 "alive session not initialized or not empty");
@@ -499,9 +474,7 @@ QUnit.test("uses only the last alive message to store active sessions", function
     
     client.connect();
     
-    aliveSessionsBuffer = writeOscMessage("/tuio2/alv", [
-        {type: "i", value: 1},
-    ]);
+    aliveSessionsBuffer = getExampleAliveBuffer([1]);
     
     QUnit.equal(client.getAliveComponents().length, 0,
                 "alive session not initialized or not empty");
@@ -527,9 +500,7 @@ QUnit.test("adds pointer to active list when pointer alive", function(assert) {
     client.connect();
     
     pointerBuffer = getExamplePointerBuffer();    
-    aliveSessionsBuffer = writeOscMessage("/tuio2/alv", [
-        {type: "i", value: 1},
-    ]);
+    aliveSessionsBuffer = getExampleAliveBuffer([1]);
     
     setTimeout(function(){
         server.send(pointerBuffer);
@@ -554,9 +525,7 @@ QUnit.test("adds multiple pointers to active list sequentially", function(assert
     client.connect();
     
     pointerBuffer = getExamplePointerBuffer();    
-    aliveSessionsBuffer = writeOscMessage("/tuio2/alv", [
-        {type: "i", value: 1},
-    ]);
+    aliveSessionsBuffer = getExampleAliveBuffer([1]);
     
     setTimeout(function(){
         server.send(pointerBuffer);
@@ -565,10 +534,7 @@ QUnit.test("adds multiple pointers to active list sequentially", function(assert
         pointerBuffer = getExamplePointerBuffer({
             sessionId: 2
         });
-        aliveSessionsBuffer = writeOscMessage("/tuio2/alv", [
-            {type: "i", value: 1},
-            {type: "i", value: 2},
-        ]);
+        aliveSessionsBuffer = getExampleAliveBuffer([1, 2]);
         server.send(pointerBuffer);
         server.send(aliveSessionsBuffer);
         // test
@@ -587,7 +553,6 @@ QUnit.test("removes pointer from active list when pointer no longer active", fun
     var asyncDone = assert.async(),
         pointerBuffer,
         aliveSessionsBuffer,
-        time = new Date().getTime(),
         pointerInstance;
     
     client.connect();
@@ -595,19 +560,10 @@ QUnit.test("removes pointer from active list when pointer no longer active", fun
     pointerBuffer = getExamplePointerBuffer({
         sessionId: 1
     });    
-    aliveSessionsBuffer = writeOscMessage("/tuio2/alv", [
-        {type: "i", value: 1},
-    ]);
-    frameMessageBuffer = writeOscMessage("/tuio2/frm", [
-        // frame id
-        {type: "i", value: 1},
-        // time
-        {type: "t", value: time},
-        // dimension 640x480
-        {type: "i", value: 41943520},
-        // source string
-        {type: "s", value: "name:1@address"}
-    ]);
+    aliveSessionsBuffer = getExampleAliveBuffer([1]);
+    frameMessageBuffer = getExampleFrameBuffer({
+        frameId: 1
+    });
     
     setTimeout(function(){
         server.send(frameMessageBuffer);
@@ -619,9 +575,7 @@ QUnit.test("removes pointer from active list when pointer no longer active", fun
         pointerBuffer = getExamplePointerBuffer({
             sessionId: 2
         });   
-        aliveSessionsBuffer = writeOscMessage("/tuio2/alv", [
-            {type: "i", value: 2},
-        ]);
+        aliveSessionsBuffer = getExampleAliveBuffer([2]);
         server.send(frameMessageBuffer);
         server.send(pointerBuffer);
         server.send(aliveSessionsBuffer);
