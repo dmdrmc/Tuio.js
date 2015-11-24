@@ -314,7 +314,7 @@ QUnit.test("uses only the last alive message to store active sessions", function
     }, 10);
 });
     
-QUnit.test("adds pointers to objects list when pointer alive", function(assert) {
+QUnit.test("adds pointers to active list when pointer alive", function(assert) {
     
     var asyncDone = assert.async(),
         pointerBuffer,
