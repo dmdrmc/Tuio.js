@@ -79,6 +79,9 @@ Tuio.Client = Tuio.Model.extend({
 
     onConnect: function() {
         this.oscReceiver.on("message", this.acceptMessage);
+        this.oscReceiver.on("error", function(e) {
+            console.log(e.message);
+        });
         this.connected = true;
         this.trigger("connect");
     },
