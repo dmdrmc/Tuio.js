@@ -87,5 +87,32 @@ QUnit.test("construct with partial source string", function() {
     QUnit.strictEqual(source.sourceAddress, "localhost",
                     "default sourceAdress was not set to 'localhost'");
 });
+    
+QUnit.test("return sourceString from parameter", function() {
+    
+    var source = new Tuio.Source({
+        sourceInstance: 2,
+        sourceName: "source",
+        sourceAddress: "not-localhost"
+    });
+    
+    QUnit.strictEqual(source.getSourceString(), "source:2@not-localhost",
+                        "sourceString not properly read");
+});
+
+QUnit.test("returns correct width and height from dimension", function() {
+    
+    var source = new Tuio.Source({
+        // 640 x 480
+        // 02 80 01 E0
+        dimension: 41943520
+    });
+    
+    QUnit.strictEqual(source.getWidth(), 640,
+                        "source width not properly extracted from dimension");
+    
+    QUnit.strictEqual(source.getHeight(), 480,
+                        "source height not properly extracted from dimension");
+});
 
 })();

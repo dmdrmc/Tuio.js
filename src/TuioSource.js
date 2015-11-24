@@ -10,10 +10,15 @@ if (typeof require !== "undefined") {
 
 Tuio.Source = Tuio.Model.extend({
     sourceId: null,
+    sourceName: null,
+    sourceInstance: null,
+    sourceAddress: null,
+    dimension: null,
+    dimensionBufferView: null,
     
     initialize: function(params) {
         params = params || {};
-        var sourceStringParams = this.getSourceString(params.sourceString),
+        var sourceStringParams = this.setSourceString(params.sourceString),
             sourceId = params.sourceId || 0,
             sourceName = params.sourceName || sourceStringParams.sourceName,
             sourceInstance = params.sourceInstance || sourceStringParams.sourceInstance,
@@ -24,10 +29,12 @@ Tuio.Source = Tuio.Model.extend({
         this.sourceName = sourceName;
         this.sourceInstance = sourceInstance;
         this.sourceAddress = sourceAddress;
-        this.dimension = dimension; 
+        this.dimension = dimension;
+        this.dimensionBufferView = new DataView(new ArrayBuffer(4));
+        this.dimensionBufferView.setUint32(0, this.dimension)
     },
     
-    getSourceString: function(sourceString) {
+    setSourceString: function(sourceString) {
         var defaultSource = {
             sourceName: "",
             sourceInstance: 0,
@@ -54,9 +61,18 @@ Tuio.Source = Tuio.Model.extend({
         return _.merge(defaultSource, sourceParams);
     },
     
-    setSourceString: function() {
-        
+    getSourceString: function() {
+        return this.sourceName + ":" + this.sourceInstance +
+                    "@" + this.sourceAddress;
     },
+    
+    getWidth: function() {
+        return this.dimensionBufferView.getUint16(0);
+    },
+    
+    getHeight: function() {
+        return this.dimensionBufferView.getUint16(2);
+    }
 }, {
 });
     
