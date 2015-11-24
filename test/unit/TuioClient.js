@@ -6,8 +6,6 @@ var client,
     server,
     osc = require("osc/dist/osc-browser");
     
-    console.log(osc);
-    
 function writeOscMessage(address, args) {
     
     var arrayBuffer = new ArrayBuffer(1000),
