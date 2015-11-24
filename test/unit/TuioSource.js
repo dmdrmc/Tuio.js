@@ -100,11 +100,12 @@ QUnit.test("return sourceString from parameter", function() {
                         "sourceString not properly read");
 });
 
-QUnit.test("returns correct width and height from dimension", function() {
+QUnit.test("return correct width and height from dimension", function() {
     
     var source = new Tuio.Source({
         // 640 x 480
-        // 02 80 01 E0
+        // 02 80 => 640 01 E0 => 480
+        // 02 80 01 E0 => 41943520
         dimension: 41943520
     });
     
@@ -113,6 +114,22 @@ QUnit.test("returns correct width and height from dimension", function() {
     
     QUnit.strictEqual(source.getHeight(), 480,
                         "source height not properly extracted from dimension");
+});
+
+QUnit.test("sets and retrieves frametime", function() {
+    
+    var source = new Tuio.Source();
+    
+    QUnit.notOk(source.getFrameTime(),
+                    "frame time should not be set");
+    
+    source.setFrameTime();
+    QUnit.notOk(source.getFrameTime(),
+                    "frame time should still not be set");
+    
+    source.setFrameTime(new Tuio.Time());
+    QUnit.ok(source.getFrameTime(),
+                "frame time should be set");
 });
 
 })();

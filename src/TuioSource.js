@@ -15,6 +15,7 @@ Tuio.Source = Tuio.Model.extend({
     sourceAddress: null,
     dimension: null,
     dimensionBufferView: null,
+    frameTime: null,
     
     initialize: function(params) {
         params = params || {};
@@ -31,7 +32,8 @@ Tuio.Source = Tuio.Model.extend({
         this.sourceAddress = sourceAddress;
         this.dimension = dimension;
         this.dimensionBufferView = new DataView(new ArrayBuffer(4));
-        this.dimensionBufferView.setUint32(0, this.dimension)
+        this.dimensionBufferView.setUint32(0, this.dimension);
+        this.frameTime = params.frameTime;
     },
     
     setSourceString: function(sourceString) {
@@ -72,6 +74,14 @@ Tuio.Source = Tuio.Model.extend({
     
     getHeight: function() {
         return this.dimensionBufferView.getUint16(2);
+    },
+    
+    getFrameTime: function() {
+        return this.frameTime;
+    },
+    
+    setFrameTime: function(ttime) {
+        this.frameTime = ttime;
     }
 }, {
 });
