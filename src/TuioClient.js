@@ -241,7 +241,7 @@ Tuio.Client = Tuio.Model.extend({
         //mark all pointers not in the alive list for removal
         this.pointerList.forEach(function(pointer){
             if (self.aliveComponentList.indexOf(pointer.getSessionId()) === -1) {
-                pointer.remove(this.frameTime);
+                pointer.remove(self.frameTime);
                 self.framePointers.push(pointer);
             }
         });
@@ -250,6 +250,12 @@ Tuio.Client = Tuio.Model.extend({
             switch(framePointer.getTuioState()) {
                 case Tuio.Object.TUIO_ADDED:
                     self.pointerList.push(framePointer);
+                    break;
+                case Tuio.Object.TUIO_REMOVED:
+                    var removeIndex = self.pointerList.indexOf(framePointer);
+                    if (removeIndex !== -1) {
+                        self.pointerList.splice(removeIndex, 1);
+                    }
                     break;
             }
         });

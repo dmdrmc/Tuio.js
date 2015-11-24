@@ -581,5 +581,60 @@ QUnit.test("adds multiple pointers to active list sequentially", function(assert
         asyncDone();
     }, 10);
 });
+    
+QUnit.test("removes pointer from active list when pointer no longer active", function(assert) {
+    
+    var asyncDone = assert.async(),
+        pointerBuffer,
+        aliveSessionsBuffer,
+        time = new Date().getTime(),
+        pointerInstance;
+    
+    client.connect();
+    
+    pointerBuffer = getExamplePointerBuffer({
+        sessionId: 1
+    });    
+    aliveSessionsBuffer = writeOscMessage("/tuio2/alv", [
+        {type: "i", value: 1},
+    ]);
+    frameMessageBuffer = writeOscMessage("/tuio2/frm", [
+        // frame id
+        {type: "i", value: 1},
+        // time
+        {type: "t", value: time},
+        // dimension 640x480
+        {type: "i", value: 41943520},
+        // source string
+        {type: "s", value: "name:1@address"}
+    ]);
+    
+    setTimeout(function(){
+        server.send(frameMessageBuffer);
+        server.send(pointerBuffer);
+        server.send(aliveSessionsBuffer);
+        // pointer is now active per previous test
+        // send a different pointer message too implicitly remove the previous one
+        // sessionId 1 => 2
+        pointerBuffer = getExamplePointerBuffer({
+            sessionId: 2
+        });   
+        aliveSessionsBuffer = writeOscMessage("/tuio2/alv", [
+            {type: "i", value: 2},
+        ]);
+        server.send(frameMessageBuffer);
+        server.send(pointerBuffer);
+        server.send(aliveSessionsBuffer);
+        // the length stays 1, pointer 1 is removed, pointer 2 added
+        QUnit.notStrictEqual(client.getTuioPointers().length, 2,
+                    "first pointer was not removed");
+        QUnit.strictEqual(client.getTuioPointers().length, 1,
+                    "pointer 2 is not active");
+        assertExamplePointer(client.getTuioPointers()[0], {
+            sessionId: 2
+        });
+        asyncDone();
+    }, 10);
+});
 
 })();
