@@ -33,7 +33,7 @@ Tuio.Source = Tuio.Model.extend({
         this.dimension = dimension;
         this.dimensionBufferView = new DataView(new ArrayBuffer(4));
         this.dimensionBufferView.setUint32(0, this.dimension);
-        this.frameTime = params.frameTime;
+        this.frameTime = params.frameTime || new Tuio.Time();
     },
     
     setSourceString: function(sourceString) {
@@ -81,7 +81,8 @@ Tuio.Source = Tuio.Model.extend({
     },
     
     setFrameTime: function(ttime) {
-        this.frameTime = ttime;
+        if (typeof ttime !== "undefined")
+            this.frameTime = ttime;
     }
 }, {
 });

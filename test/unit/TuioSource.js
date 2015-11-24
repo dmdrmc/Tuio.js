@@ -120,12 +120,12 @@ QUnit.test("sets and retrieves frametime", function() {
     
     var source = new Tuio.Source();
     
-    QUnit.notOk(source.getFrameTime(),
-                    "frame time should not be set");
+    QUnit.strictEqual(source.getFrameTime().getSeconds(), 0,
+                        "frame time should not be set");
     
     source.setFrameTime();
-    QUnit.notOk(source.getFrameTime(),
-                    "frame time should still not be set");
+    QUnit.strictEqual(source.getFrameTime().getSeconds(), 0, 
+                        "frame time should still not be set");
     
     source.setFrameTime(new Tuio.Time());
     QUnit.ok(source.getFrameTime(),

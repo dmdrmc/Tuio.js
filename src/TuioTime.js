@@ -9,6 +9,8 @@ if (typeof require !== "undefined") {
 Tuio.Time = Tuio.Model.extend({
     seconds: 0,
     microSeconds: 0,
+    //tuio2
+    frameId: 0,
 
     initialize: function(sec, usec) {
         this.seconds = sec || 0;
@@ -77,6 +79,14 @@ Tuio.Time = Tuio.Model.extend({
 
     getTotalMilliseconds: function() {
         return this.seconds * 1000 + Math.floor(this.microSeconds / 1000);
+    },
+    // tuio2
+    getFrameId: function() {
+        return this.frameId;
+    },
+    
+    setFrameId: function(frameId) {
+        this.frameId = frameId;
     }
 }, {
     startSeconds: 0,

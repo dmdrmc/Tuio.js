@@ -25,6 +25,8 @@ Tuio.Client = Tuio.Model.extend({
     aliveCursorList: null,
     newCursorList: null,
     frameCursors: null,
+    //tuio2 frames
+    sourceList: null,
     //tuio2/any-component
     aliveComponentList: null,
     //tuio2/ptr
@@ -36,6 +38,9 @@ Tuio.Client = Tuio.Model.extend({
     currentFrame: null,
     currentTime: null,
     oscReceiver: null,
+    // check
+    frameTime: null,
+    lateFrame: null,
 
     initialize: function(params) {
         this.host = params.host;
@@ -50,6 +55,8 @@ Tuio.Client = Tuio.Model.extend({
         this.aliveCursorList = [];
         this.newCursorList = [];
         this.frameCursors = [];
+        //tuio2 frames
+        this.sourceList = {},
         //tuio2/any-component
         this.aliveComponentList = [];
         //tuio2/ptr
@@ -63,6 +70,8 @@ Tuio.Client = Tuio.Model.extend({
         this.oscReceiver = new osc.WebSocketPort({
             url: this.host
         });
+        //
+        this.lateFrame = false;
 
         _.bindAll(this, "onConnect", "acceptBundle", "acceptMessage", "onDisconnect");
     },
@@ -146,11 +155,14 @@ Tuio.Client = Tuio.Model.extend({
             case "/tuio/2Dcur":
                 this.handleCursorMessage(tuio1command, tuio1arguments);
                 break;
-            case "/tuio2/alv":
-                this.handleAliveMessage(messageArgs);
+            case "/tuio2/frm":
+                this.handleFrameMessage(messageArgs);
                 break;
             case "/tuio2/ptr":
                 this.handlePointerMessage(messageArgs);
+                break;
+            case "/tuio2/alv":
+                this.handleAliveMessage(messageArgs);
                 break;
         }
     },
@@ -183,7 +195,41 @@ Tuio.Client = Tuio.Model.extend({
         }
     },
     
-    handleAliveMessage: function(args) {        
+    handleFrameMessage: function(args) {
+        args = args || [];
+        var frameId = args[0],
+            timetag = args[1],
+            dimension = args[2],
+            sourceString = args[3],
+            source,
+            lastFrameId,
+            timediff;
+        
+        source = this.sourceList[sourceString];
+        if (typeof source === "undefined") {
+            source = new Tuio.Source({
+                frameId: frameId,
+                dimension: dimension,
+                sourceString: sourceString
+            });
+            this.sourceList[sourceString] = source;
+        }
+        // time to set
+        this.frameTime = new Tuio.Time.fromMilliseconds(timetag.native*1000);
+        this.frameTime.setFrameId(frameId);
+        // last known source frame id
+        lastFrameId = source.getFrameTime().getFrameId();
+        timediff = this.frameTime.getTotalMilliseconds() -
+                        source.getFrameTime().getTotalMilliseconds();
+        // set time!
+        source.setFrameTime(this.frameTime);
+        // late frame check
+        this.lateFrame = (frameId < lastFrameId &&
+                            frameId !== 0 &&
+                            timediff < 1000) ? true : false;
+    },
+    
+    handleAliveMessage: function(args) {
         args = args || [];
         var self = this;
         
@@ -192,13 +238,24 @@ Tuio.Client = Tuio.Model.extend({
             [].push.apply(this.aliveComponentList, args);
         }
         
-        this.framePointers.forEach(function(pointer){
-            switch(pointer.getTuioState()) {
+        //mark all pointers not in the alive list for removal
+        this.pointerList.forEach(function(pointer){
+            if (self.aliveComponentList.indexOf(pointer.getSessionId()) === -1) {
+                pointer.remove(this.frameTime);
+                self.framePointers.push(pointer);
+            }
+        });
+        
+        this.framePointers.forEach(function(framePointer){
+            switch(framePointer.getTuioState()) {
                 case Tuio.Object.TUIO_ADDED:
-                    self.pointerList.push(pointer);
+                    self.pointerList.push(framePointer);
                     break;
             }
-        })
+        });
+        
+        //end of frame
+        this.framePointers = [];
     },
     
     getAliveComponents: function() {
