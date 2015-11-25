@@ -70,7 +70,9 @@ function writeOscMessage(address, args) {
     
 function getExamplePointerBuffer(params) {
     params = params || {};
-    var sessionId = params.sessionId || 1;
+    var sessionId = params.sessionId || 1,
+        xPos = params.xPos || 5,
+        yPos = params.yPos || 6;
     
     return writeOscMessage("/tuio2/ptr", [
         //session id
@@ -82,9 +84,9 @@ function getExamplePointerBuffer(params) {
         // component id
         {type: "i", value: 4},
         // x_pos
-        {type: "f", value: 5},
+        {type: "f", value: xPos},
         // y_pos
-        {type: "f", value: 6},
+        {type: "f", value: yPos},
         // angle
         {type: "f", value: 7},
         // shear
@@ -255,8 +257,7 @@ QUnit.test("keeps track of Tuio1 cursors", function(assert) {
 QUnit.test("keeps track of Tuio2 pointers on the current frame", function(assert) {
     
     var asyncDone = assert.async(),
-        arrayBuffer,
-        pointerInstance;
+        arrayBuffer;
     
     client.connect();
     
@@ -494,8 +495,7 @@ QUnit.test("adds pointer to active list when pointer alive", function(assert) {
     
     var asyncDone = assert.async(),
         pointerBuffer,
-        aliveSessionsBuffer,
-        pointerInstance;
+        aliveSessionsBuffer;
     
     client.connect();
     
@@ -519,8 +519,7 @@ QUnit.test("adds multiple pointers to active list sequentially", function(assert
     
     var asyncDone = assert.async(),
         pointerBuffer,
-        aliveSessionsBuffer,
-        pointerInstance;
+        aliveSessionsBuffer;
     
     client.connect();
     
@@ -552,8 +551,7 @@ QUnit.test("removes pointer from active list when pointer no longer active", fun
     
     var asyncDone = assert.async(),
         pointerBuffer,
-        aliveSessionsBuffer,
-        pointerInstance;
+        aliveSessionsBuffer;
     
     client.connect();
     
@@ -588,6 +586,62 @@ QUnit.test("removes pointer from active list when pointer no longer active", fun
             sessionId: 2
         });
         asyncDone();
+    }, 10);
+});
+    
+QUnit.test("updates existing pointer in the pointer list, if it already exists", function(assert) {
+    
+    var asyncDone = assert.async(),
+        pointerBuffer,
+        aliveSessionsBuffer,
+        pointerInstance;
+    
+    client.connect();
+    
+    pointerBuffer = getExamplePointerBuffer({
+        sessionId: 1,
+        xPos: 1,
+        yPos: 1
+    });
+    aliveSessionsBuffer = getExampleAliveBuffer([1]);
+    frameMessageBuffer = getExampleFrameBuffer({
+        frameId: 1
+    });
+    
+    setTimeout(function(){
+        server.send(frameMessageBuffer);
+        server.send(pointerBuffer);
+        server.send(aliveSessionsBuffer);
+        // send again delayed so speed is not infinity
+        setTimeout(function() {
+            // change
+            pointerBuffer = getExamplePointerBuffer({
+                sessionId: 1,
+                xPos: 100,
+                yPos: 200
+            });
+            frameMessageBuffer = getExampleFrameBuffer({
+                frameId: 2
+            });
+            server.send(frameMessageBuffer);
+            server.send(pointerBuffer);
+            server.send(aliveSessionsBuffer);
+            // the length stays 1, pointer 1 was only updated
+            QUnit.notStrictEqual(client.getTuioPointers().length, 2,
+                        "first pointer was not removed");
+
+            pointerInstance = client.getTuioPointers()[0];
+            QUnit.strictEqual(pointerInstance.getX(), 100,
+                                "pointer x position not properly updated");
+            QUnit.strictEqual(pointerInstance.getY(), 200,
+                                "pointer y position not properly updated");
+            QUnit.strictEqual(pointerInstance.getPath().length, 2,
+                                "pointer path not properly updated");
+            QUnit.notStrictEqual(pointerInstance.getXSpeed(), 0);
+            QUnit.notStrictEqual(pointerInstance.getYSpeed(), 0);
+            console.log(pointerInstance.getXSpeed());
+            asyncDone();
+        }, 10);
     }, 10);
 });
 

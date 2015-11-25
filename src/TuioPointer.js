@@ -16,6 +16,7 @@ Tuio.Pointer = Tuio.Container.extend({
     shear: null,
     radius: null,
     pressure: null,
+    source: null,
 
     initialize: function(params) {
         Tuio.Container.prototype.initialize.call(this, params);
@@ -28,6 +29,7 @@ Tuio.Pointer = Tuio.Container.extend({
         this.shear = params.sa;
         this.radius = params.r;
         this.pressure = params.p;
+        this.source = params.source;
     },
 
     getPointerId: function() {
@@ -54,6 +56,9 @@ Tuio.Pointer = Tuio.Container.extend({
     getPressure: function() {
         return this.pressure;
     },
+    getTuioSource: function() {
+        return this.source;
+    },
     setTypeUserId: function(tu_id) {
         var arrayBuffer = new ArrayBuffer(4),
             bufferView = new DataView(arrayBuffer);
@@ -61,7 +66,7 @@ Tuio.Pointer = Tuio.Container.extend({
         bufferView.setUint32(0, tu_id);
         this.typeId = bufferView.getUint16(0);
         this.userId = bufferView.getUint16(2);
-    }
+    },
 }, { 
     fromPointer: function(tptr) {
         return new Tuio.Pointer({

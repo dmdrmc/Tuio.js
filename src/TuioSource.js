@@ -36,6 +36,10 @@ Tuio.Source = Tuio.Model.extend({
         this.frameTime = params.frameTime || new Tuio.Time();
     },
     
+    getSourceId: function() {
+        return this.sourceId;
+    },
+    
     setSourceString: function(sourceString) {
         var defaultSource = {
             sourceName: "",

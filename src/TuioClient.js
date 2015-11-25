@@ -38,7 +38,8 @@ Tuio.Client = Tuio.Model.extend({
     currentFrame: null,
     currentTime: null,
     oscReceiver: null,
-    // check
+    // last frame info
+    frameSource: null,
     frameTime: null,
     lateFrame: null,
 
@@ -201,28 +202,27 @@ Tuio.Client = Tuio.Model.extend({
             timetag = args[1],
             dimension = args[2],
             sourceString = args[3],
-            source,
             lastFrameId,
             timediff;
         
-        source = this.sourceList[sourceString];
-        if (typeof source === "undefined") {
-            source = new Tuio.Source({
+        this.frameSource = this.sourceList[sourceString];
+        if (typeof this.frameSource === "undefined") {
+            this.frameSource = new Tuio.Source({
                 frameId: frameId,
                 dimension: dimension,
                 sourceString: sourceString
             });
-            this.sourceList[sourceString] = source;
+            this.sourceList[sourceString] = this.frameSource;
         }
         // time to set
         this.frameTime = new Tuio.Time.fromMilliseconds(timetag.native*1000);
         this.frameTime.setFrameId(frameId);
         // last known source frame id
-        lastFrameId = source.getFrameTime().getFrameId();
+        lastFrameId = this.frameSource.getFrameTime().getFrameId();
         timediff = this.frameTime.getTotalMilliseconds() -
-                        source.getFrameTime().getTotalMilliseconds();
+                        this.frameSource.getFrameTime().getTotalMilliseconds();
         // set time!
-        source.setFrameTime(this.frameTime);
+        this.frameSource.setFrameTime(this.frameTime);
         // late frame check
         this.lateFrame = (frameId < lastFrameId &&
                             frameId !== 0 &&
@@ -280,26 +280,64 @@ Tuio.Client = Tuio.Model.extend({
             angle = args[5],
             shear = args[6],
             radius = args[7],
-            pressure = args[8];
+            pressure = args[8],
+            pointer;
         
-        var pointer = new Tuio.Pointer({
-            si: s_id,
-            pi: -1,
-            xp: x_pos,
-            yp: y_pos,
-            a: angle,
-            sa: shear,
-            r: radius,
-            p: pressure
-        });
-        
-        pointer.setTypeUserId(tu_id);
-        
-        this.framePointers.push(pointer);
+        if (this.frameSource) {
+            pointer = this.getFramePointer(this.frameSource.getSourceId(), s_id);
+        }
+        if (typeof pointer === "undefined") {
+            pointer = new Tuio.Pointer({
+                si: s_id,
+                pi: -1,
+                xp: x_pos,
+                yp: y_pos,
+                a: angle,
+                sa: shear,
+                r: radius,
+                p: pressure,
+                source: this.frameSource
+            });
+            pointer.setTypeUserId(tu_id);
+            this.framePointers.push(pointer);
+        }
+        else if (pointer.getX() !== x_pos ||
+                    pointer.getY() !== y_pos ||
+                    pointer.getAngle() !== angle ||
+                    pointer.getShear() !== shear) {
+            pointer.update({
+                xp: x_pos,
+                yp: y_pos,
+                a: angle
+            });
+            this.framePointers.push(pointer);
+        }
     },
     
     getFramePointers: function() {
         return this.framePointers;
+    },
+    
+    getFramePointer: function(sourceId, sessionId) {
+        var wantedPointer;
+        
+        this.framePointers.forEach(function(framePointer){
+            if (framePointer.getSessionId() === sessionId) {
+                wantedPointer = framePointer;
+            }
+        });
+        
+        if (typeof wantedPointer === "undefined") {
+            this.pointerList.forEach(function(activePointer){
+                if (typeof activePointer.getTuioSource() !== "undefined" &&
+                        activePointer.getTuioSource().getSourceId() === sourceId &&
+                        activePointer.getSessionId() === sessionId) {
+                    wantedPointer = activePointer;
+                }
+            });
+        }
+        
+        return wantedPointer;
     },
     
     objectSet: function(args) {
