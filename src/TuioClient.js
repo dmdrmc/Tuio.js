@@ -281,24 +281,27 @@ Tuio.Client = Tuio.Model.extend({
             shear = args[6],
             radius = args[7],
             pressure = args[8],
-            pointer;
-        
-        if (this.frameSource) {
-            pointer = this.getFramePointer(this.frameSource.getSourceId(), s_id);
-        }
-        if (typeof pointer === "undefined") {
-            pointer = new Tuio.Pointer({
-                si: s_id,
-                pi: -1,
+            pointerUpdateParams = {
                 xp: x_pos,
                 yp: y_pos,
                 a: angle,
                 sa: shear,
                 r: radius,
                 p: pressure,
-                source: this.frameSource,
                 ttime: this.frameTime
-            });
+            },
+            pointerCreateParams = _.extend({}, pointerUpdateParams, {
+                si: s_id,
+                pi: -1,
+                source: this.frameSource
+            }),
+            pointer;
+        
+        if (this.frameSource) {
+            pointer = this.getFramePointer(this.frameSource.getSourceId(), s_id);
+        }
+        if (typeof pointer === "undefined") {
+            pointer = new Tuio.Pointer(pointerCreateParams);
             pointer.setTypeUserId(tu_id);
             this.framePointers.push(pointer);
         }
@@ -306,12 +309,7 @@ Tuio.Client = Tuio.Model.extend({
                     pointer.getY() !== y_pos ||
                     pointer.getAngle() !== angle ||
                     pointer.getShear() !== shear) {
-            pointer.update({
-                xp: x_pos,
-                yp: y_pos,
-                a: angle,
-                ttime: this.frameTime
-            });
+            pointer.update(pointerUpdateParams);
             this.framePointers.push(pointer);
         }
     },
