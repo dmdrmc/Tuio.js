@@ -17,6 +17,7 @@ Tuio.Pointer = Tuio.Container.extend({
     radius: null,
     pressure: null,
     source: null,
+    currentTime: null,
 
     initialize: function(params) {
         Tuio.Container.prototype.initialize.call(this, params);
@@ -67,6 +68,11 @@ Tuio.Pointer = Tuio.Container.extend({
         this.typeId = bufferView.getUint16(0);
         this.userId = bufferView.getUint16(2);
     },
+    
+    update: function(params) {
+        params = params || {};
+        Tuio.Container.prototype.update.call(this, params);
+    }
 }, { 
     fromPointer: function(tptr) {
         return new Tuio.Pointer({

@@ -612,36 +612,34 @@ QUnit.test("updates existing pointer in the pointer list, if it already exists",
         server.send(frameMessageBuffer);
         server.send(pointerBuffer);
         server.send(aliveSessionsBuffer);
-        // send again delayed so speed is not infinity
-        setTimeout(function() {
-            // change
-            pointerBuffer = getExamplePointerBuffer({
-                sessionId: 1,
-                xPos: 100,
-                yPos: 200
-            });
-            frameMessageBuffer = getExampleFrameBuffer({
-                frameId: 2
-            });
-            server.send(frameMessageBuffer);
-            server.send(pointerBuffer);
-            server.send(aliveSessionsBuffer);
-            // the length stays 1, pointer 1 was only updated
-            QUnit.notStrictEqual(client.getTuioPointers().length, 2,
-                        "first pointer was not removed");
+        // change
+        pointerBuffer = getExamplePointerBuffer({
+            sessionId: 1,
+            xPos: 100,
+            yPos: 200
+        });
+        frameMessageBuffer = getExampleFrameBuffer({
+            frameId: 2
+        });
+        // send again 
+        server.send(frameMessageBuffer);
+        server.send(pointerBuffer);
+        server.send(aliveSessionsBuffer);
+        // the length stays 1, pointer 1 was only updated
+        QUnit.notStrictEqual(client.getTuioPointers().length, 2,
+                    "first pointer was not removed");
 
-            pointerInstance = client.getTuioPointers()[0];
-            QUnit.strictEqual(pointerInstance.getX(), 100,
-                                "pointer x position not properly updated");
-            QUnit.strictEqual(pointerInstance.getY(), 200,
-                                "pointer y position not properly updated");
-            QUnit.strictEqual(pointerInstance.getPath().length, 2,
-                                "pointer path not properly updated");
-            QUnit.notStrictEqual(pointerInstance.getXSpeed(), 0);
-            QUnit.notStrictEqual(pointerInstance.getYSpeed(), 0);
-            console.log(pointerInstance.getXSpeed());
-            asyncDone();
-        }, 10);
+        pointerInstance = client.getTuioPointers()[0];
+        QUnit.strictEqual(pointerInstance.getX(), 100,
+                            "pointer x position not properly updated");
+        QUnit.strictEqual(pointerInstance.getY(), 200,
+                            "pointer y position not properly updated");
+        QUnit.strictEqual(pointerInstance.getPath().length, 2,
+                            "pointer path not properly updated");
+        QUnit.notStrictEqual(pointerInstance.getXSpeed(), 0);
+        QUnit.notStrictEqual(pointerInstance.getXSpeed(), Infinity);
+        QUnit.notStrictEqual(pointerInstance.getYSpeed(), 0);
+        asyncDone();
     }, 10);
 });
 

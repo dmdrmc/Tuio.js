@@ -296,7 +296,8 @@ Tuio.Client = Tuio.Model.extend({
                 sa: shear,
                 r: radius,
                 p: pressure,
-                source: this.frameSource
+                source: this.frameSource,
+                ttime: this.frameTime
             });
             pointer.setTypeUserId(tu_id);
             this.framePointers.push(pointer);
@@ -308,7 +309,8 @@ Tuio.Client = Tuio.Model.extend({
             pointer.update({
                 xp: x_pos,
                 yp: y_pos,
-                a: angle
+                a: angle,
+                ttime: this.frameTime
             });
             this.framePointers.push(pointer);
         }
