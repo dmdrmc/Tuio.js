@@ -6,9 +6,6 @@ node_js:
 cache:
   directories:
     - node_modules
-
-os:
-  - osx
     
 before_install:
   - export CHROME_BIN=chromium-browser
