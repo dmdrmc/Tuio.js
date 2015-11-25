@@ -57,7 +57,7 @@ function writeOscMessage(address, args) {
                     break;
                 case "t":
                     time = osc.writeTimeTag({native: value});
-                    time.forEach(function(byte) {
+                    [].forEach.call(time, function(byte) {
                         bufferView.setUint8(index, byte);
                         index += 1; 
                     });
