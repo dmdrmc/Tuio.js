@@ -16,8 +16,9 @@ Tuio.Pointer = Tuio.Container.extend({
     shear: null,
     radius: null,
     pressure: null,
+    pressureSpeed: null,
+    pressureAccel: null,
     source: null,
-    currentTime: null,
 
     initialize: function(params) {
         Tuio.Container.prototype.initialize.call(this, params);
@@ -31,6 +32,8 @@ Tuio.Pointer = Tuio.Container.extend({
         this.radius = params.r;
         this.pressure = params.p;
         this.source = params.source;
+        this.pressureSpeed = params.ps;
+        this.pressureAccel = params.pa;
     },
 
     getPointerId: function() {
@@ -56,6 +59,12 @@ Tuio.Pointer = Tuio.Container.extend({
     },
     getPressure: function() {
         return this.pressure;
+    },
+    getPressureSpeed: function() {
+        return this.pressureSpeed;
+    },
+    getPressureAccel: function() {
+        return this.pressureAccel;
     },
     getTuioSource: function() {
         return this.source;

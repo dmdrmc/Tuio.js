@@ -275,20 +275,30 @@ Tuio.Client = Tuio.Model.extend({
         var s_id = args[0],
             tu_id = args[1],
             c_id = args[2],
-            x_pos = args[3],
-            y_pos = args[4],
+            xpos = args[3],
+            ypos = args[4],
             angle = args[5],
             shear = args[6],
             radius = args[7],
             pressure = args[8],
+            xspeed = args[9],
+            yspeed = args[10],
+            pspeed = args[11],
+            maccel = args[12],
+            paccel = args[13],
             pointerUpdateParams = {
-                xp: x_pos,
-                yp: y_pos,
+                xp: xpos,
+                yp: ypos,
                 a: angle,
                 sa: shear,
                 r: radius,
                 p: pressure,
-                ttime: this.frameTime
+                ttime: this.frameTime,
+                xs: xspeed,
+                ys: yspeed,
+                ps: pspeed,
+                ma: maccel,
+                pa: paccel
             },
             pointerCreateParams = _.extend({}, pointerUpdateParams, {
                 si: s_id,
@@ -305,8 +315,8 @@ Tuio.Client = Tuio.Model.extend({
             pointer.setTypeUserId(tu_id);
             this.framePointers.push(pointer);
         }
-        else if (pointer.getX() !== x_pos ||
-                    pointer.getY() !== y_pos ||
+        else if (pointer.getX() !== xpos ||
+                    pointer.getY() !== ypos ||
                     pointer.getAngle() !== angle ||
                     pointer.getShear() !== shear) {
             pointer.update(pointerUpdateParams);

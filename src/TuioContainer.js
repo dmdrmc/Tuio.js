@@ -20,10 +20,10 @@ Tuio.Container = Tuio.Point.extend({
         Tuio.Point.prototype.initialize.call(this, params);
 
         this.sessionId = params.si;
-        this.xSpeed = 0;
-        this.ySpeed = 0;
+        this.xSpeed = params.xs || 0;
+        this.ySpeed = params.ys || 0;
         this.motionSpeed = 0;
-        this.motionAccel = 0;
+        this.motionAccel = params.ma || 0;
         this.path = [new Tuio.Point({
             ttime: this.currentTime,
             xp: this.xPos,

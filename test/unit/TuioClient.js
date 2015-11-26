@@ -72,30 +72,47 @@ function getExamplePointerBuffer(params) {
     params = params || {};
     var sessionId = params.sessionId || 1,
         xPos = params.xPos || 5,
-        yPos = params.yPos || 6;
+        yPos = params.yPos || 6,
+        messageParams = [
+            //session id
+            {type: "i", value: sessionId},
+            //tu_id, two 16-bit values
+            //t_id => 15, u_id => 7
+            // 0x00 0x0f 0x00 0x07 => big endian 983047
+            {type: "i", value: 983047},
+            // component id
+            {type: "i", value: 4},
+            // x_pos
+            {type: "f", value: xPos},
+            // y_pos
+            {type: "f", value: yPos},
+            // angle
+            {type: "f", value: 7},
+            // shear
+            {type: "f", value: 8},
+            // radius
+            {type: "f", value: 9},
+            // pressure
+            {type: "f", value: 10},
+        ],
+        optionalMessageParams = [
+            params.xSpeed,
+            params.ySpeed,
+            params.pressureSpeed,
+            params.motionAccel,
+            params.pressureAccel
+        ];
     
-    return writeOscMessage("/tuio2/ptr", [
-        //session id
-        {type: "i", value: sessionId},
-        //tu_id, two 16-bit values
-        //t_id => 15, u_id => 7
-        // 0x00 0x0f 0x00 0x07 => big endian 983047
-        {type: "i", value: 983047},
-        // component id
-        {type: "i", value: 4},
-        // x_pos
-        {type: "f", value: xPos},
-        // y_pos
-        {type: "f", value: yPos},
-        // angle
-        {type: "f", value: 7},
-        // shear
-        {type: "f", value: 8},
-        // radius
-        {type: "f", value: 9},
-        // pressure
-        {type: "f", value: 10},
-    ]);
+    optionalMessageParams.forEach(function(optionalParam){
+        if (typeof optionalParam !== "undefined") {
+            messageParams.push({
+                type: "f", 
+                value: optionalParam
+            });
+        }
+    });
+
+    return writeOscMessage("/tuio2/ptr", messageParams);
 }
     
 function getExampleAliveBuffer(sessionIds) {
@@ -639,6 +656,46 @@ QUnit.test("updates existing pointer in the pointer list, if it already exists",
         QUnit.notStrictEqual(pointerInstance.getXSpeed(), 0);
         QUnit.notStrictEqual(pointerInstance.getXSpeed(), Infinity);
         QUnit.notStrictEqual(pointerInstance.getYSpeed(), 0);
+        asyncDone();
+    }, 10);
+});
+
+QUnit.test("sets optional pointer parameters", function(assert) {
+    
+    var asyncDone = assert.async(),
+        pointerBuffer,
+        aliveSessionsBuffer,
+        pointerInstance;
+    
+    client.connect();
+    
+    pointerBuffer = getExamplePointerBuffer({
+        sessionId: 1,
+        xPos: 1,
+        yPos: 1,
+        xSpeed: 11,
+        ySpeed: 12,
+        pressureSpeed: 9,
+        motionAccel: 13,
+        pressureAccel: 10,
+    });
+    aliveSessionsBuffer = getExampleAliveBuffer([1]);
+    frameMessageBuffer = getExampleFrameBuffer({
+        frameId: 1
+    });
+    
+    setTimeout(function(){
+        server.send(frameMessageBuffer);
+        server.send(pointerBuffer);
+        server.send(aliveSessionsBuffer);
+
+        pointerInstance = client.getTuioPointers()[0];
+        
+        QUnit.strictEqual(pointerInstance.getXSpeed(), 11);
+        QUnit.strictEqual(pointerInstance.getYSpeed(), 12);
+        QUnit.strictEqual(pointerInstance.getPressureSpeed(), 9);
+        QUnit.strictEqual(pointerInstance.getPressureAccel(), 10);
+        QUnit.strictEqual(pointerInstance.getMotionAccel(), 13);
         asyncDone();
     }, 10);
 });
