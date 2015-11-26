@@ -30,7 +30,7 @@ TuioCanvas.Main = (function() {
 
     initClient = function() {
         client = new Tuio.Client({
-            host: "ws://localhost:5000"
+            host: "ws://localhost:8080"
         });
         client.on("connect", onConnect);
         client.connect();
@@ -47,7 +47,12 @@ TuioCanvas.Main = (function() {
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         var cursors = client.getTuioCursors(),
+	pointers = client.getTuioPointers(),
         objects = client.getTuioObjects();
+
+	for(var i in pointers) {
+	    drawCursor(pointers[i])
+	}
 
         for (var i in cursors) {
             drawCursor(cursors[i]);
