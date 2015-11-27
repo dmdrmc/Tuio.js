@@ -697,4 +697,40 @@ QUnit.test("sets optional pointer parameters on creation", function(assert) {
     }, 10);
 });
 
+QUnit.test("sets optional pointer parameters on update", function(assert) {
+    
+    var asyncDone = assert.async(),
+        pointerInstance;
+    
+    client.connect();
+    
+    setTimeout(function(){
+        
+        sendBundle({
+            xSpeed: 11,
+            ySpeed: 12,
+            pressureSpeed: 9,
+            motionAccel: 13,
+            pressureAccel: 10,
+        });
+        
+        sendBundle({
+            xSpeed: 110,
+            ySpeed: 120,
+            pressureSpeed: 90,
+            motionAccel: 130,
+            pressureAccel: 100,
+        });
+        
+        pointerInstance = client.getTuioPointers()[0];
+        
+        QUnit.strictEqual(pointerInstance.getXSpeed(), 110);
+        QUnit.strictEqual(pointerInstance.getYSpeed(), 120);
+        QUnit.strictEqual(pointerInstance.getPressureSpeed(), 90);
+        QUnit.strictEqual(pointerInstance.getPressureAccel(), 100);
+        QUnit.strictEqual(pointerInstance.getMotionAccel(), 130);
+        asyncDone();
+    }, 10);
+});
+
 })();

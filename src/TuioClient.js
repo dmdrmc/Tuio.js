@@ -318,7 +318,14 @@ Tuio.Client = Tuio.Model.extend({
         else if (pointer.getX() !== xpos ||
                     pointer.getY() !== ypos ||
                     pointer.getAngle() !== angle ||
-                    pointer.getShear() !== shear) {
+                    pointer.getShear() !== shear ||
+                    pointer.getRadius() !== radius ||
+                    pointer.getPressure() !== pressure ||
+                    pointer.getXSpeed() !== xspeed ||
+                    pointer.getYSpeed() !== yspeed ||
+                    pointer.getPressureSpeed() !== pspeed ||
+                    pointer.getPressureAccel() !== paccel ||
+                    pointer.getMotionAccel() !== maccel) {
             pointer.update(pointerUpdateParams);
             this.framePointers.push(pointer);
         }

@@ -23,6 +23,8 @@ Tuio.Pointer = Tuio.Container.extend({
     initialize: function(params) {
         Tuio.Container.prototype.initialize.call(this, params);
 
+        this.source = params.source;
+        
         this.pointerId = params.pi;
         this.typeId = params.ti
         this.userId = params.ui;
@@ -31,7 +33,6 @@ Tuio.Pointer = Tuio.Container.extend({
         this.shear = params.sa;
         this.radius = params.r;
         this.pressure = params.p;
-        this.source = params.source;
         this.pressureSpeed = params.ps;
         this.pressureAccel = params.pa;
     },
@@ -80,7 +81,14 @@ Tuio.Pointer = Tuio.Container.extend({
     
     update: function(params) {
         params = params || {};
+        
         Tuio.Container.prototype.update.call(this, params);
+        this.angle = params.a;
+        this.shear = params.sa;
+        this.radius = params.r;
+        this.pressure = params.p;
+        this.pressureSpeed = params.ps;
+        this.pressureAccel = params.pa;
     }
 }, { 
     fromPointer: function(tptr) {
