@@ -31,7 +31,7 @@ TuioCanvas.Main = (function() {
 
     initClient = function() {
         client = new Tuio.Client({
-            host: "ws://localhost:5000"
+            host: "ws://localhost:8080"
         });
         client.on("connect", onConnect);
         client.connect();
@@ -48,7 +48,12 @@ TuioCanvas.Main = (function() {
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         var cursors = client.getTuioCursors(),
+	pointers = client.getTuioPointers(),
         objects = client.getTuioObjects();
+
+	for(var i in pointers) {
+	    drawCursor(pointers[i])
+	}
 
         for (var i in cursors) {
             drawCursor(cursors[i]);
@@ -97,6 +102,7 @@ TuioCanvas.Main = (function() {
 $(function() {
     TuioCanvas.init();
 });
+
 },{"../../src/Tuio":12,"../../src/TuioClient":13}],2:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -15630,7 +15636,7 @@ module.exports = isArray || function (val) {
 
 },{}],9:[function(require,module,exports){
 (function (Buffer){
-/*! osc.js 2.0.0, Copyright 2015 Colin Clark | github.com/colinbdclark/osc.js */
+/*! osc.js 2.0.1, Copyright 2015 Colin Clark | github.com/colinbdclark/osc.js */
 
 /*
  * osc.js: An Open Sound Control library for JavaScript that works in both the browser and Node.js
@@ -16386,7 +16392,7 @@ var osc = osc || {};
     osc.readMessage = function (data, options, offsetState) {
         options = options || osc.defaults;
 
-        var dv = osc.dataView(data, data.byteOffset, data.length);
+        var dv = osc.dataView(data, data.byteOffset, data.byteLength);
         offsetState = offsetState || {
             idx: 0
         };
@@ -16529,7 +16535,7 @@ var osc = osc || {};
      * @return {Object} a bundle or message object
      */
     osc.readPacket = function (data, options, offsetState, len) {
-        var dv = osc.dataView(data, data.byteOffset, data.length);
+        var dv = osc.dataView(data, data.byteOffset, data.byteLength);
 
         len = len === undefined ? dv.byteLength : len;
         offsetState = offsetState || {
@@ -16648,7 +16654,7 @@ var osc = osc || {};
                 } else if (arg instanceof Uint8Array ||
                     arg instanceof ArrayBuffer) {
                     return "b";
-                } else if (arg.high instanceof Number && arg.low instanceof Number) {
+                } else if (typeof arg.high === "number" && typeof arg.low === "number") {
                     return "h";
                 }
                 break;
@@ -16712,7 +16718,16 @@ var osc = osc || {};
  * Released under the Apache License, Version 2.0
  * see: https://github.com/dcodeIO/Long.js for details
  */
-(function(global) {
+(function(global, factory) {
+
+    /* AMD */ if (typeof define === 'function' && define["amd"])
+        define([], factory);
+    /* CommonJS */ else if (typeof require === 'function' && typeof module === "object" && module && module["exports"])
+        module["exports"] = factory();
+    /* Global */ else
+        (global["dcodeIO"] = global["dcodeIO"] || {})["Long"] = factory();
+
+})(this, function() {
     "use strict";
 
     /**
@@ -16725,7 +16740,7 @@ var osc = osc || {};
      * @param {boolean=} unsigned Whether unsigned or not, defaults to `false` for signed
      * @constructor
      */
-    var Long = function(low, high, unsigned) {
+    function Long(low, high, unsigned) {
 
         /**
          * The low 32 bits as a signed value.
@@ -16747,7 +16762,7 @@ var osc = osc || {};
          * @expose
          */
         this.unsigned = !!unsigned;
-    };
+    }
 
     // The internal representation of a long is the two given signed, 32-bit values.
     // We use 32-bit pieces because these are the size of integers on which
@@ -16767,13 +16782,28 @@ var osc = osc || {};
     // methods on which they depend.
 
     /**
+     * An indicator used to reliably determine if an object is a Long or not.
+     * @type {boolean}
+     * @const
+     * @expose
+     * @private
+     */
+    Long.__isLong__;
+
+    Object.defineProperty(Long.prototype, "__isLong__", {
+        value: true,
+        enumerable: false,
+        configurable: false
+    });
+
+    /**
      * Tests if the specified object is a Long.
      * @param {*} obj Object
      * @returns {boolean}
      * @expose
      */
-    Long.isLong = function(obj) {
-        return (obj && obj instanceof Long) === true;
+    Long.isLong = function isLong(obj) {
+        return (obj && obj["__isLong__"]) === true;
     };
 
     /**
@@ -16797,7 +16827,7 @@ var osc = osc || {};
      * @returns {!Long} The corresponding Long value
      * @expose
      */
-    Long.fromInt = function(value, unsigned) {
+    Long.fromInt = function fromInt(value, unsigned) {
         var obj, cachedObj;
         if (!unsigned) {
             value = value | 0;
@@ -16831,7 +16861,7 @@ var osc = osc || {};
      * @returns {!Long} The corresponding Long value
      * @expose
      */
-    Long.fromNumber = function(value, unsigned) {
+    Long.fromNumber = function fromNumber(value, unsigned) {
         unsigned = !!unsigned;
         if (isNaN(value) || !isFinite(value))
             return Long.ZERO;
@@ -16855,7 +16885,7 @@ var osc = osc || {};
      * @returns {!Long} The corresponding Long value
      * @expose
      */
-    Long.fromBits = function(lowBits, highBits, unsigned) {
+    Long.fromBits = function fromBits(lowBits, highBits, unsigned) {
         return new Long(lowBits, highBits, unsigned);
     };
 
@@ -16867,7 +16897,7 @@ var osc = osc || {};
      * @returns {!Long} The corresponding Long value
      * @expose
      */
-    Long.fromString = function(str, unsigned, radix) {
+    Long.fromString = function fromString(str, unsigned, radix) {
         if (str.length === 0)
             throw Error('number format error: empty string');
         if (str === "NaN" || str === "Infinity" || str === "+Infinity" || str === "-Infinity")
@@ -16911,14 +16941,14 @@ var osc = osc || {};
      * @returns {!Long}
      * @expose
      */
-    Long.fromValue = function(val) {
+    Long.fromValue = function fromValue(val) {
+        if (val /* is compatible */ instanceof Long)
+            return val;
         if (typeof val === 'number')
             return Long.fromNumber(val);
         if (typeof val === 'string')
             return Long.fromString(val);
-        if (Long.isLong(val))
-            return val;
-        // Throws for not an object (undefined, null):
+        // Throws for non-objects, converts non-instanceof Long:
         return new Long(val.low, val.high, val.unsigned);
     };
 
@@ -17028,7 +17058,7 @@ var osc = osc || {};
      * @returns {number}
      * @expose
      */
-    Long.prototype.toInt = function() {
+    Long.prototype.toInt = function toInt() {
         return this.unsigned ? this.low >>> 0 : this.low;
     };
 
@@ -17037,7 +17067,7 @@ var osc = osc || {};
      * @returns {number}
      * @expose
      */
-    Long.prototype.toNumber = function() {
+    Long.prototype.toNumber = function toNumber() {
         if (this.unsigned) {
             return ((this.high >>> 0) * TWO_PWR_32_DBL) + (this.low >>> 0);
         }
@@ -17052,7 +17082,7 @@ var osc = osc || {};
      * @throws {RangeError} If `radix` is out of range
      * @expose
      */
-    Long.prototype.toString = function(radix) {
+    Long.prototype.toString = function toString(radix) {
         radix = radix || 10;
         if (radix < 2 || 36 < radix)
             throw RangeError('radix out of range: ' + radix);
@@ -17064,7 +17094,7 @@ var osc = osc || {};
                 // We need to change the Long value before it can be negated, so we remove
                 // the bottom-most digit in this base and then recurse to do the rest.
                 var radixLong = Long.fromNumber(radix);
-                var div = this.div(radixLong);
+                var div = this.divide(radixLong);
                 rem = div.multiply(radixLong).subtract(this);
                 return div.toString(radix) + rem.toInt().toString(radix);
             } else
@@ -17077,7 +17107,7 @@ var osc = osc || {};
         rem = this;
         var result = '';
         while (true) {
-            var remDiv = rem.div(radixToPower),
+            var remDiv = rem.divide(radixToPower),
                 intval = rem.subtract(remDiv.multiply(radixToPower)).toInt() >>> 0,
                 digits = intval.toString(radix);
             rem = remDiv;
@@ -17096,7 +17126,7 @@ var osc = osc || {};
      * @returns {number} Signed high bits
      * @expose
      */
-    Long.prototype.getHighBits = function() {
+    Long.prototype.getHighBits = function getHighBits() {
         return this.high;
     };
 
@@ -17105,7 +17135,7 @@ var osc = osc || {};
      * @returns {number} Unsigned high bits
      * @expose
      */
-    Long.prototype.getHighBitsUnsigned = function() {
+    Long.prototype.getHighBitsUnsigned = function getHighBitsUnsigned() {
         return this.high >>> 0;
     };
 
@@ -17114,7 +17144,7 @@ var osc = osc || {};
      * @returns {number} Signed low bits
      * @expose
      */
-    Long.prototype.getLowBits = function() {
+    Long.prototype.getLowBits = function getLowBits() {
         return this.low;
     };
 
@@ -17123,7 +17153,7 @@ var osc = osc || {};
      * @returns {number} Unsigned low bits
      * @expose
      */
-    Long.prototype.getLowBitsUnsigned = function() {
+    Long.prototype.getLowBitsUnsigned = function getLowBitsUnsigned() {
         return this.low >>> 0;
     };
 
@@ -17132,7 +17162,7 @@ var osc = osc || {};
      * @returns {number}
      * @expose
      */
-    Long.prototype.getNumBitsAbs = function() {
+    Long.prototype.getNumBitsAbs = function getNumBitsAbs() {
         if (this.isNegative()) // Unsigned Longs are never negative
             return this.equals(Long.MIN_VALUE) ? 64 : this.negate().getNumBitsAbs();
         var val = this.high != 0 ? this.high : this.low;
@@ -17147,7 +17177,7 @@ var osc = osc || {};
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.isZero = function() {
+    Long.prototype.isZero = function isZero() {
         return this.high === 0 && this.low === 0;
     };
 
@@ -17156,7 +17186,7 @@ var osc = osc || {};
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.isNegative = function() {
+    Long.prototype.isNegative = function isNegative() {
         return !this.unsigned && this.high < 0;
     };
 
@@ -17165,7 +17195,7 @@ var osc = osc || {};
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.isPositive = function() {
+    Long.prototype.isPositive = function isPositive() {
         return this.unsigned || this.high >= 0;
     };
 
@@ -17174,7 +17204,7 @@ var osc = osc || {};
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.isOdd = function() {
+    Long.prototype.isOdd = function isOdd() {
         return (this.low & 1) === 1;
     };
 
@@ -17183,7 +17213,7 @@ var osc = osc || {};
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.isEven = function() {
+    Long.prototype.isEven = function isEven() {
         return (this.low & 1) === 0;
     };
 
@@ -17193,7 +17223,7 @@ var osc = osc || {};
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.equals = function(other) {
+    Long.prototype.equals = function equals(other) {
         if (!Long.isLong(other))
             other = Long.fromValue(other);
         if (this.unsigned !== other.unsigned && (this.high >>> 31) === 1 && (other.high >>> 31) === 1)
@@ -17202,16 +17232,32 @@ var osc = osc || {};
     };
 
     /**
+     * Tests if this Long's value equals the specified's. This is an alias of {@link Long#equals}.
+     * @function
+     * @param {!Long|number|string} other Other value
+     * @returns {boolean}
+     * @expose
+     */
+    Long.eq = Long.prototype.equals;
+
+    /**
      * Tests if this Long's value differs from the specified's.
      * @param {!Long|number|string} other Other value
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.notEquals = function(other) {
-        if (!Long.isLong(other))
-            other = Long.fromValue(other);
-        return !this.equals(other);
+    Long.prototype.notEquals = function notEquals(other) {
+        return !this.equals(/* validates */ other);
     };
+
+    /**
+     * Tests if this Long's value differs from the specified's. This is an alias of {@link Long#notEquals}.
+     * @function
+     * @param {!Long|number|string} other Other value
+     * @returns {boolean}
+     * @expose
+     */
+    Long.neq = Long.prototype.notEquals;
 
     /**
      * Tests if this Long's value is less than the specified's.
@@ -17219,11 +17265,18 @@ var osc = osc || {};
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.lessThan = function(other) {
-        if (!Long.isLong(other))
-            other = Long.fromValue(other);
-        return this.compare(other) < 0;
+    Long.prototype.lessThan = function lessThan(other) {
+        return this.compare(/* validates */ other) < 0;
     };
+
+    /**
+     * Tests if this Long's value is less than the specified's. This is an alias of {@link Long#lessThan}.
+     * @function
+     * @param {!Long|number|string} other Other value
+     * @returns {boolean}
+     * @expose
+     */
+    Long.prototype.lt = Long.prototype.lessThan;
 
     /**
      * Tests if this Long's value is less than or equal the specified's.
@@ -17231,11 +17284,18 @@ var osc = osc || {};
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.lessThanOrEqual = function(other) {
-        if (!Long.isLong(other))
-            other = Long.fromValue(other);
-        return this.compare(other) <= 0;
+    Long.prototype.lessThanOrEqual = function lessThanOrEqual(other) {
+        return this.compare(/* validates */ other) <= 0;
     };
+
+    /**
+     * Tests if this Long's value is less than or equal the specified's. This is an alias of {@link Long#lessThanOrEqual}.
+     * @function
+     * @param {!Long|number|string} other Other value
+     * @returns {boolean}
+     * @expose
+     */
+    Long.prototype.lte = Long.prototype.lessThanOrEqual;
 
     /**
      * Tests if this Long's value is greater than the specified's.
@@ -17243,11 +17303,18 @@ var osc = osc || {};
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.greaterThan = function(other) {
-        if (!Long.isLong(other))
-            other = Long.fromValue(other);
-        return this.compare(other) > 0;
+    Long.prototype.greaterThan = function greaterThan(other) {
+        return this.compare(/* validates */ other) > 0;
     };
+
+    /**
+     * Tests if this Long's value is greater than the specified's. This is an alias of {@link Long#greaterThan}.
+     * @function
+     * @param {!Long|number|string} other Other value
+     * @returns {boolean}
+     * @expose
+     */
+    Long.prototype.gt = Long.prototype.greaterThan;
 
     /**
      * Tests if this Long's value is greater than or equal the specified's.
@@ -17255,11 +17322,18 @@ var osc = osc || {};
      * @returns {boolean}
      * @expose
      */
-    Long.prototype.greaterThanOrEqual = function(other) {
-        if (!Long.isLong(other))
-            other = Long.fromValue(other);
-        return this.compare(other) >= 0;
+    Long.prototype.greaterThanOrEqual = function greaterThanOrEqual(other) {
+        return this.compare(/* validates */ other) >= 0;
     };
+
+    /**
+     * Tests if this Long's value is greater than or equal the specified's. This is an alias of {@link Long#greaterThanOrEqual}.
+     * @function
+     * @param {!Long|number|string} other Other value
+     * @returns {boolean}
+     * @expose
+     */
+    Long.prototype.gte = Long.prototype.greaterThanOrEqual;
 
     /**
      * Compares this Long's value with the specified's.
@@ -17268,7 +17342,9 @@ var osc = osc || {};
      *  if the given one is greater
      * @expose
      */
-    Long.prototype.compare = function(other) {
+    Long.prototype.compare = function compare(other) {
+        if (!Long.isLong(other))
+            other = Long.fromValue(other);
         if (this.equals(other))
             return 0;
         var thisNeg = this.isNegative(),
@@ -17289,11 +17365,19 @@ var osc = osc || {};
      * @returns {!Long} Negated Long
      * @expose
      */
-    Long.prototype.negate = function() {
+    Long.prototype.negate = function negate() {
         if (!this.unsigned && this.equals(Long.MIN_VALUE))
             return Long.MIN_VALUE;
         return this.not().add(Long.ONE);
     };
+
+    /**
+     * Negates this Long's value. This is an alias of {@link Long#negate}.
+     * @function
+     * @returns {!Long} Negated Long
+     * @expose
+     */
+    Long.prototype.neg = Long.prototype.negate;
 
     /**
      * Returns the sum of this and the specified Long.
@@ -17301,7 +17385,7 @@ var osc = osc || {};
      * @returns {!Long} Sum
      * @expose
      */
-    Long.prototype.add = function(addend) {
+    Long.prototype.add = function add(addend) {
         if (!Long.isLong(addend))
             addend = Long.fromValue(addend);
 
@@ -17338,11 +17422,20 @@ var osc = osc || {};
      * @returns {!Long} Difference
      * @expose
      */
-    Long.prototype.subtract = function(subtrahend) {
+    Long.prototype.subtract = function subtract(subtrahend) {
         if (!Long.isLong(subtrahend))
             subtrahend = Long.fromValue(subtrahend);
         return this.add(subtrahend.negate());
     };
+
+    /**
+     * Returns the difference of this and the specified Long. This is an alias of {@link Long#subtract}.
+     * @function
+     * @param {!Long|number|string} subtrahend Subtrahend
+     * @returns {!Long} Difference
+     * @expose
+     */
+    Long.prototype.sub = Long.prototype.subtract;
 
     /**
      * Returns the product of this and the specified Long.
@@ -17350,7 +17443,7 @@ var osc = osc || {};
      * @returns {!Long} Product
      * @expose
      */
-    Long.prototype.multiply = function(multiplier) {
+    Long.prototype.multiply = function multiply(multiplier) {
         if (this.isZero())
             return Long.ZERO;
         if (!Long.isLong(multiplier))
@@ -17412,12 +17505,21 @@ var osc = osc || {};
     };
 
     /**
+     * Returns the product of this and the specified Long. This is an alias of {@link Long#multiply}.
+     * @function
+     * @param {!Long|number|string} multiplier Multiplier
+     * @returns {!Long} Product
+     * @expose
+     */
+    Long.prototype.mul = Long.prototype.multiply;
+
+    /**
      * Returns this Long divided by the specified.
      * @param {!Long|number|string} divisor Divisor
      * @returns {!Long} Quotient
      * @expose
      */
-    Long.prototype.div = function(divisor) {
+    Long.prototype.divide = function divide(divisor) {
         if (!Long.isLong(divisor))
             divisor = Long.fromValue(divisor);
         if (divisor.isZero())
@@ -17433,12 +17535,12 @@ var osc = osc || {};
             else {
                 // At this point, we have |other| >= 2, so |this/other| < |MIN_VALUE|.
                 var halfThis = this.shiftRight(1);
-                approx = halfThis.div(divisor).shiftLeft(1);
+                approx = halfThis.divide(divisor).shiftLeft(1);
                 if (approx.equals(Long.ZERO)) {
                     return divisor.isNegative() ? Long.ONE : Long.NEG_ONE;
                 } else {
                     rem = this.subtract(divisor.multiply(approx));
-                    res = approx.add(rem.div(divisor));
+                    res = approx.add(rem.divide(divisor));
                     return res;
                 }
             }
@@ -17446,10 +17548,10 @@ var osc = osc || {};
             return this.unsigned ? Long.UZERO : Long.ZERO;
         if (this.isNegative()) {
             if (divisor.isNegative())
-                return this.negate().div(divisor.negate());
-            return this.negate().div(divisor).negate();
+                return this.negate().divide(divisor.negate());
+            return this.negate().divide(divisor).negate();
         } else if (divisor.isNegative())
-            return this.div(divisor.negate()).negate();
+            return this.divide(divisor.negate()).negate();
 
         // Repeat the following until the remainder is less than other:  find a
         // floating-point that approximates remainder / other *from below*, add this
@@ -17490,23 +17592,41 @@ var osc = osc || {};
     };
 
     /**
+     * Returns this Long divided by the specified. This is an alias of {@link Long#divide}.
+     * @function
+     * @param {!Long|number|string} divisor Divisor
+     * @returns {!Long} Quotient
+     * @expose
+     */
+    Long.prototype.div = Long.prototype.divide;
+
+    /**
      * Returns this Long modulo the specified.
      * @param {!Long|number|string} divisor Divisor
      * @returns {!Long} Remainder
      * @expose
      */
-    Long.prototype.modulo = function(divisor) {
+    Long.prototype.modulo = function modulo(divisor) {
         if (!Long.isLong(divisor))
             divisor = Long.fromValue(divisor);
-        return this.subtract(this.div(divisor).multiply(divisor));
+        return this.subtract(this.divide(divisor).multiply(divisor));
     };
+
+    /**
+     * Returns this Long modulo the specified. This is an alias of {@link Long#modulo}.
+     * @function
+     * @param {!Long|number|string} divisor Divisor
+     * @returns {!Long} Remainder
+     * @expose
+     */
+    Long.prototype.mod = Long.prototype.modulo;
 
     /**
      * Returns the bitwise NOT of this Long.
      * @returns {!Long}
      * @expose
      */
-    Long.prototype.not = function() {
+    Long.prototype.not = function not() {
         return Long.fromBits(~this.low, ~this.high, this.unsigned);
     };
 
@@ -17516,7 +17636,7 @@ var osc = osc || {};
      * @returns {!Long}
      * @expose
      */
-    Long.prototype.and = function(other) {
+    Long.prototype.and = function and(other) {
         if (!Long.isLong(other))
             other = Long.fromValue(other);
         return Long.fromBits(this.low & other.low, this.high & other.high, this.unsigned);
@@ -17528,7 +17648,7 @@ var osc = osc || {};
      * @returns {!Long}
      * @expose
      */
-    Long.prototype.or = function(other) {
+    Long.prototype.or = function or(other) {
         if (!Long.isLong(other))
             other = Long.fromValue(other);
         return Long.fromBits(this.low | other.low, this.high | other.high, this.unsigned);
@@ -17540,7 +17660,7 @@ var osc = osc || {};
      * @returns {!Long}
      * @expose
      */
-    Long.prototype.xor = function(other) {
+    Long.prototype.xor = function xor(other) {
         if (!Long.isLong(other))
             other = Long.fromValue(other);
         return Long.fromBits(this.low ^ other.low, this.high ^ other.high, this.unsigned);
@@ -17552,7 +17672,7 @@ var osc = osc || {};
      * @returns {!Long} Shifted Long
      * @expose
      */
-    Long.prototype.shiftLeft = function(numBits) {
+    Long.prototype.shiftLeft = function shiftLeft(numBits) {
         if (Long.isLong(numBits))
             numBits = numBits.toInt();
         if ((numBits &= 63) === 0)
@@ -17564,12 +17684,21 @@ var osc = osc || {};
     };
 
     /**
+     * Returns this Long with bits shifted to the left by the given amount. This is an alias of {@link Long#shiftLeft}.
+     * @function
+     * @param {number|!Long} numBits Number of bits
+     * @returns {!Long} Shifted Long
+     * @expose
+     */
+    Long.prototype.shl = Long.prototype.shiftLeft;
+
+    /**
      * Returns this Long with bits arithmetically shifted to the right by the given amount.
      * @param {number|!Long} numBits Number of bits
      * @returns {!Long} Shifted Long
      * @expose
      */
-    Long.prototype.shiftRight = function(numBits) {
+    Long.prototype.shiftRight = function shiftRight(numBits) {
         if (Long.isLong(numBits))
             numBits = numBits.toInt();
         if ((numBits &= 63) === 0)
@@ -17581,12 +17710,21 @@ var osc = osc || {};
     };
 
     /**
+     * Returns this Long with bits arithmetically shifted to the right by the given amount. This is an alias of {@link Long#shiftRight}.
+     * @function
+     * @param {number|!Long} numBits Number of bits
+     * @returns {!Long} Shifted Long
+     * @expose
+     */
+    Long.prototype.shr = Long.prototype.shiftRight;
+
+    /**
      * Returns this Long with bits logically shifted to the right by the given amount.
      * @param {number|!Long} numBits Number of bits
      * @returns {!Long} Shifted Long
      * @expose
      */
-    Long.prototype.shiftRightUnsigned = function(numBits) {
+    Long.prototype.shiftRightUnsigned = function shiftRightUnsigned(numBits) {
         if (Long.isLong(numBits))
             numBits = numBits.toInt();
         numBits &= 63;
@@ -17605,11 +17743,20 @@ var osc = osc || {};
     };
 
     /**
+     * Returns this Long with bits logically shifted to the right by the given amount. This is an alias of {@link Long#shiftRightUnsigned}.
+     * @function
+     * @param {number|!Long} numBits Number of bits
+     * @returns {!Long} Shifted Long
+     * @expose
+     */
+    Long.prototype.shru = Long.prototype.shiftRightUnsigned;
+
+    /**
      * Converts this Long to signed.
      * @returns {!Long} Signed long
      * @expose
      */
-    Long.prototype.toSigned = function() {
+    Long.prototype.toSigned = function toSigned() {
         if (!this.unsigned)
             return this;
         return new Long(this.low, this.high, false);
@@ -17620,20 +17767,14 @@ var osc = osc || {};
      * @returns {!Long} Unsigned long
      * @expose
      */
-    Long.prototype.toUnsigned = function() {
+    Long.prototype.toUnsigned = function toUnsigned() {
         if (this.unsigned)
             return this;
         return new Long(this.low, this.high, true);
     };
 
-    /* CommonJS */ if (typeof require === 'function' && typeof module === 'object' && module && typeof exports === 'object' && exports)
-        module["exports"] = Long;
-    /* AMD */ else if (typeof define === 'function' && define["amd"])
-        define(function() { return Long; });
-    /* Global */ else
-        (global["dcodeIO"] = global["dcodeIO"] || {})["Long"] = Long;
-
-})(this);
+    return Long;
+});
 ;/*
  * slip.js: A plain JavaScript SLIP implementation that works in both the browser and Node.js
  *
@@ -18193,20 +18334,22 @@ var osc = osc || {};
      * @return {Object} Current instance of EventEmitter for chaining.
      */
     proto.emitEvent = function emitEvent(evt, args) {
-        var listeners = this.getListenersAsObject(evt);
+        var listenersMap = this.getListenersAsObject(evt);
+        var listeners;
         var listener;
         var i;
         var key;
         var response;
 
-        for (key in listeners) {
-            if (listeners.hasOwnProperty(key)) {
-                i = listeners[key].length;
+        for (key in listenersMap) {
+            if (listenersMap.hasOwnProperty(key)) {
+                listeners = listenersMap[key].slice(0);
+                i = listeners.length;
 
                 while (i--) {
                     // If the listener returns true then it shall be removed from the event
                     // The function is executed either with a basic call or an apply if there is an args array
-                    listener = listeners[key][i];
+                    listener = listeners[i];
 
                     if (listener.once === true) {
                         this.removeListener(evt, listener.listener);
@@ -18595,7 +18738,7 @@ var osc = osc;
 }).call(this,require("buffer").Buffer)
 },{"./osc.js":10,"buffer":3,"events":4,"long":8,"slip":11}],10:[function(require,module,exports){
 (function (Buffer){
-/*! osc.js 2.0.0, Copyright 2015 Colin Clark | github.com/colinbdclark/osc.js */
+/*! osc.js 2.0.1, Copyright 2015 Colin Clark | github.com/colinbdclark/osc.js */
 
 /*
  * osc.js: An Open Sound Control library for JavaScript that works in both the browser and Node.js
@@ -19351,7 +19494,7 @@ var osc = osc || {};
     osc.readMessage = function (data, options, offsetState) {
         options = options || osc.defaults;
 
-        var dv = osc.dataView(data, data.byteOffset, data.length);
+        var dv = osc.dataView(data, data.byteOffset, data.byteLength);
         offsetState = offsetState || {
             idx: 0
         };
@@ -19494,7 +19637,7 @@ var osc = osc || {};
      * @return {Object} a bundle or message object
      */
     osc.readPacket = function (data, options, offsetState, len) {
-        var dv = osc.dataView(data, data.byteOffset, data.length);
+        var dv = osc.dataView(data, data.byteOffset, data.byteLength);
 
         len = len === undefined ? dv.byteLength : len;
         offsetState = offsetState || {
@@ -19613,7 +19756,7 @@ var osc = osc || {};
                 } else if (arg instanceof Uint8Array ||
                     arg instanceof ArrayBuffer) {
                     return "b";
-                } else if (arg.high instanceof Number && arg.low instanceof Number) {
+                } else if (typeof arg.high === "number" && typeof arg.low === "number") {
                     return "h";
                 }
                 break;
@@ -20039,31 +20182,55 @@ Tuio.Client = Tuio.Model.extend({
     host: null,
     socket: null,
     connected: null,
+    //tuio2Dobj
     objectList: null,
     aliveObjectList: null,
     newObjectList: null,
+    frameObjects: null,
+    //tuio/2Dcur
     cursorList: null,
     aliveCursorList: null,
     newCursorList: null,
-    frameObjects: null,
     frameCursors: null,
+    //tuio2 frames
+    sourceList: null,
+    //tuio2/any-component
+    aliveComponentList: null,
+    //tuio2/ptr
+    pointerList: null,
+    framePointers: null,
+    //
     freeCursorList: null,
     maxCursorId: null,
     currentFrame: null,
     currentTime: null,
     oscReceiver: null,
+    // last frame info
+    frameSource: null,
+    frameTime: null,
+    lateFrame: null,
 
     initialize: function(params) {
         this.host = params.host;
         this.connected = false;
+        //tuio/2Dobj
         this.objectList = {};
         this.aliveObjectList = [];
         this.newObjectList = [];
+        this.frameObjects = [];
+        //tuio/2Dcur
         this.cursorList = {};
         this.aliveCursorList = [];
         this.newCursorList = [];
-        this.frameObjects = [];
         this.frameCursors = [];
+        //tuio2 frames
+        this.sourceList = {},
+        //tuio2/any-component
+        this.aliveComponentList = [];
+        //tuio2/ptr
+        this.pointerList = [];
+        this.framePointers = [];
+        //
         this.freeCursorList = [];
         this.maxCursorId = -1;
         this.currentFrame = 0;
@@ -20071,6 +20238,8 @@ Tuio.Client = Tuio.Model.extend({
         this.oscReceiver = new osc.WebSocketPort({
             url: this.host
         });
+        //
+        this.lateFrame = false;
 
         _.bindAll(this, "onConnect", "acceptBundle", "acceptMessage", "onDisconnect");
     },
@@ -20087,6 +20256,9 @@ Tuio.Client = Tuio.Model.extend({
 
     onConnect: function() {
         this.oscReceiver.on("message", this.acceptMessage);
+        this.oscReceiver.on("error", function(e) {
+            console.log(e.message);
+        });
         this.connected = true;
         this.trigger("connect");
     },
@@ -20107,6 +20279,10 @@ Tuio.Client = Tuio.Model.extend({
 
     getTuioCursors: function() {
         return _.clone(this.cursorList);
+    },
+    
+    getTuioPointers: function() {
+        return _.clone(this.pointerList);
     },
 
     getTuioObject: function(sid) {
@@ -20137,15 +20313,24 @@ Tuio.Client = Tuio.Model.extend({
     acceptMessage: function(oscMessage) {
         var address = oscMessage.address,
             messageArgs = oscMessage.args,
-            command = messageArgs[0],
-            args = messageArgs.slice(1, messageArgs.length);
+            tuio1command = messageArgs[0],
+            tuio1arguments = messageArgs.slice(1, messageArgs.length);
 
         switch (address) {
             case "/tuio/2Dobj":
-                this.handleObjectMessage(command, args);
+                this.handleObjectMessage(tuio1command, tuio1arguments);
                 break;
             case "/tuio/2Dcur":
-                this.handleCursorMessage(command, args);
+                this.handleCursorMessage(tuio1command, tuio1arguments);
+                break;
+            case "/tuio2/frm":
+                this.handleFrameMessage(messageArgs);
+                break;
+            case "/tuio2/ptr":
+                this.handlePointerMessage(messageArgs);
+                break;
+            case "/tuio2/alv":
+                this.handleAliveMessage(messageArgs);
                 break;
         }
     },
@@ -20177,7 +20362,161 @@ Tuio.Client = Tuio.Model.extend({
                 break;
         }
     },
-
+    
+    handleFrameMessage: function(args) {
+        args = args || [];
+        var frameId = args[0],
+            timetag = args[1],
+            dimension = args[2],
+            sourceString = args[3],
+            lastFrameId,
+            timediff;
+        
+        this.frameSource = this.sourceList[sourceString];
+        if (typeof this.frameSource === "undefined") {
+            this.frameSource = new Tuio.Source({
+                frameId: frameId,
+                dimension: dimension,
+                sourceString: sourceString
+            });
+            this.sourceList[sourceString] = this.frameSource;
+        }
+        // time to set
+        this.frameTime = new Tuio.Time.fromMilliseconds(timetag.native*1000);
+        this.frameTime.setFrameId(frameId);
+        // last known source frame id
+        lastFrameId = this.frameSource.getFrameTime().getFrameId();
+        timediff = this.frameTime.getTotalMilliseconds() -
+                        this.frameSource.getFrameTime().getTotalMilliseconds();
+        // set time!
+        this.frameSource.setFrameTime(this.frameTime);
+        // late frame check
+        this.lateFrame = (frameId < lastFrameId &&
+                            frameId !== 0 &&
+                            timediff < 1000) ? true : false;
+    },
+    
+    handleAliveMessage: function(args) {
+        args = args || [];
+        var self = this;
+        
+        this.aliveComponentList = [];
+        if (typeof args.length !== "undefined") {
+            [].push.apply(this.aliveComponentList, args);
+        }
+        
+        //mark all pointers not in the alive list for removal
+        this.pointerList.forEach(function(pointer){
+            if (self.aliveComponentList.indexOf(pointer.getSessionId()) === -1) {
+                pointer.remove(self.frameTime);
+                self.framePointers.push(pointer);
+            }
+        });
+        
+        this.framePointers.forEach(function(framePointer){
+            switch(framePointer.getTuioState()) {
+                case Tuio.Object.TUIO_ADDED:
+                    self.pointerList.push(framePointer);
+                    break;
+                case Tuio.Object.TUIO_REMOVED:
+                    var removeIndex = self.pointerList.indexOf(framePointer);
+                    if (removeIndex !== -1) {
+                        self.pointerList.splice(removeIndex, 1);
+                    }
+                    break;
+            }
+        });
+        
+        //end of frame
+        this.framePointers = [];
+    },
+    
+    getAliveComponents: function() {
+        return this.aliveComponentList;
+    },
+    
+    /**
+     * Tuio2 Pointers
+     */
+    handlePointerMessage: function(args) {
+        var s_id = args[0],
+            tu_id = args[1],
+            c_id = args[2],
+            xpos = args[3],
+            ypos = args[4],
+            angle = args[5],
+            shear = args[6],
+            radius = args[7],
+            pressure = args[8],
+            xspeed = args[9],
+            yspeed = args[10],
+            pspeed = args[11],
+            maccel = args[12],
+            paccel = args[13],
+            pointerUpdateParams = {
+                xp: xpos,
+                yp: ypos,
+                a: angle,
+                sa: shear,
+                r: radius,
+                p: pressure,
+                ttime: this.frameTime,
+                xs: xspeed,
+                ys: yspeed,
+                ps: pspeed,
+                ma: maccel,
+                pa: paccel
+            },
+            pointerCreateParams = _.extend({}, pointerUpdateParams, {
+                si: s_id,
+                pi: -1,
+                source: this.frameSource
+            }),
+            pointer;
+        
+        if (this.frameSource) {
+            pointer = this.getFramePointer(this.frameSource.getSourceId(), s_id);
+        }
+        if (typeof pointer === "undefined") {
+            pointer = new Tuio.Pointer(pointerCreateParams);
+            pointer.setTypeUserId(tu_id);
+            this.framePointers.push(pointer);
+        }
+        else if (pointer.getX() !== xpos ||
+                    pointer.getY() !== ypos ||
+                    pointer.getAngle() !== angle ||
+                    pointer.getShear() !== shear) {
+            pointer.update(pointerUpdateParams);
+            this.framePointers.push(pointer);
+        }
+    },
+    
+    getFramePointers: function() {
+        return this.framePointers;
+    },
+    
+    getFramePointer: function(sourceId, sessionId) {
+        var wantedPointer;
+        
+        this.framePointers.forEach(function(framePointer){
+            if (framePointer.getSessionId() === sessionId) {
+                wantedPointer = framePointer;
+            }
+        });
+        
+        if (typeof wantedPointer === "undefined") {
+            this.pointerList.forEach(function(activePointer){
+                if (typeof activePointer.getTuioSource() !== "undefined" &&
+                        activePointer.getTuioSource().getSourceId() === sourceId &&
+                        activePointer.getSessionId() === sessionId) {
+                    wantedPointer = activePointer;
+                }
+            });
+        }
+        
+        return wantedPointer;
+    },
+    
     objectSet: function(args) {
         var sid = args[0],
         cid = args[1],
@@ -20562,10 +20901,10 @@ Tuio.Container = Tuio.Point.extend({
         Tuio.Point.prototype.initialize.call(this, params);
 
         this.sessionId = params.si;
-        this.xSpeed = 0;
-        this.ySpeed = 0;
+        this.xSpeed = params.xs || 0;
+        this.ySpeed = params.ys || 0;
         this.motionSpeed = 0;
-        this.motionAccel = 0;
+        this.motionAccel = params.ma || 0;
         this.path = [new Tuio.Point({
             ttime: this.currentTime,
             xp: this.xPos,
@@ -20983,11 +21322,220 @@ var Tuio = root.Tuio;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
+    Tuio.Container = require("./TuioContainer");
+}
+
+Tuio.Pointer = Tuio.Container.extend({
+    pointerId: null,
+    typeId: null,
+    userId: null,
+    componentId: null,
+    angle: null,
+    shear: null,
+    radius: null,
+    pressure: null,
+    pressureSpeed: null,
+    pressureAccel: null,
+    source: null,
+
+    initialize: function(params) {
+        Tuio.Container.prototype.initialize.call(this, params);
+
+        this.pointerId = params.pi;
+        this.typeId = params.ti
+        this.userId = params.ui;
+        this.componentId = params.ci;
+        this.angle = params.a;
+        this.shear = params.sa;
+        this.radius = params.r;
+        this.pressure = params.p;
+        this.source = params.source;
+        this.pressureSpeed = params.ps;
+        this.pressureAccel = params.pa;
+    },
+
+    getPointerId: function() {
+        return this.pointerId;
+    },
+    getTypeId: function() {
+        return this.typeId;
+    },
+    getUserId: function() {
+        return this.userId;
+    },
+    getComponentId: function() {
+        return this.componentId;
+    },
+    getAngle: function() {
+        return this.angle;
+    },
+    getShear: function() {
+        return this.shear;
+    },
+    getRadius: function() {
+        return this.radius;
+    },
+    getPressure: function() {
+        return this.pressure;
+    },
+    getPressureSpeed: function() {
+        return this.pressureSpeed;
+    },
+    getPressureAccel: function() {
+        return this.pressureAccel;
+    },
+    getTuioSource: function() {
+        return this.source;
+    },
+    setTypeUserId: function(tu_id) {
+        var arrayBuffer = new ArrayBuffer(4),
+            bufferView = new DataView(arrayBuffer);
+        
+        bufferView.setUint32(0, tu_id);
+        this.typeId = bufferView.getUint16(0);
+        this.userId = bufferView.getUint16(2);
+    },
+    
+    update: function(params) {
+        params = params || {};
+        Tuio.Container.prototype.update.call(this, params);
+    }
+}, { 
+    fromPointer: function(tptr) {
+        return new Tuio.Pointer({
+            si: tptr.getSessionId(),
+            ti: tptr.getTypeId(),
+            ui: tptr.getUserId(),
+            pi: tptr.getPointerId(),
+            xp: tptr.getX(),
+            yp: tptr.getY(),
+            ci: tptr.getComponentId(),
+            a: tptr.getAngle(),
+            sa: tptr.getShear(),
+            r: tptr.getRadius(),
+            p: tptr.getPressure()
+        });
+    }
+});
+    
+if (typeof exports !== "undefined") {
+    module.exports = Tuio.Pointer;
+}
+    
+}(this));
+},{"./Tuio":12,"./TuioContainer":14}],19:[function(require,module,exports){
+(function(root) {
+
+var Tuio = root.Tuio,
+    _ = root._;
+
+if (typeof require !== "undefined") {
+    Tuio = require("./Tuio");
+    _ = require("lodash");
+}
+
+Tuio.Source = Tuio.Model.extend({
+    sourceId: null,
+    sourceName: null,
+    sourceInstance: null,
+    sourceAddress: null,
+    dimension: null,
+    dimensionBufferView: null,
+    frameTime: null,
+    
+    initialize: function(params) {
+        params = params || {};
+        var sourceStringParams = this.setSourceString(params.sourceString),
+            sourceId = params.sourceId || 0,
+            sourceName = params.sourceName || sourceStringParams.sourceName,
+            sourceInstance = params.sourceInstance || sourceStringParams.sourceInstance,
+            sourceAddress = params.sourceAddress || sourceStringParams.sourceAddress,
+            dimension = params.dimension || 0;
+        
+        this.sourceId = sourceId;
+        this.sourceName = sourceName;
+        this.sourceInstance = sourceInstance;
+        this.sourceAddress = sourceAddress;
+        this.dimension = dimension;
+        this.dimensionBufferView = new DataView(new ArrayBuffer(4));
+        this.dimensionBufferView.setUint32(0, this.dimension);
+        this.frameTime = params.frameTime || new Tuio.Time();
+    },
+    
+    getSourceId: function() {
+        return this.sourceId;
+    },
+    
+    setSourceString: function(sourceString) {
+        var defaultSource = {
+            sourceName: "",
+            sourceInstance: 0,
+            sourceAddress: "localhost"
+        },
+            sourceParams = {},
+            // awful - breaks name:1@address into [,"name", "1", "address"];
+            // or name:1 into [,"name", "1", undefined];
+            sourceRegex = /([^\:]+)(?::([^@]+)(?:@(\S+))?)?/,
+            sourceParamsArray = [];
+        
+        if (typeof sourceString === "string") {
+            sourceParamsArray = sourceString.match(sourceRegex);
+            sourceParams = {
+                sourceName: sourceParamsArray[1],
+                sourceInstance: sourceParamsArray[2],
+                sourceAddress: sourceParamsArray[3]
+            };
+            if (typeof sourceParams.sourceInstance !== "undefined") {
+                sourceParams.sourceInstance = parseInt(sourceParams.sourceInstance, 10);
+            }
+        }
+        
+        return _.merge(defaultSource, sourceParams);
+    },
+    
+    getSourceString: function() {
+        return this.sourceName + ":" + this.sourceInstance +
+                    "@" + this.sourceAddress;
+    },
+    
+    getWidth: function() {
+        return this.dimensionBufferView.getUint16(0);
+    },
+    
+    getHeight: function() {
+        return this.dimensionBufferView.getUint16(2);
+    },
+    
+    getFrameTime: function() {
+        return this.frameTime;
+    },
+    
+    setFrameTime: function(ttime) {
+        if (typeof ttime !== "undefined")
+            this.frameTime = ttime;
+    }
+}, {
+});
+    
+if (typeof exports !== "undefined") {
+    module.exports = Tuio.Source;
+}
+    
+}(this));
+},{"./Tuio":12,"lodash":7}],20:[function(require,module,exports){
+(function(root) {
+
+var Tuio = root.Tuio;
+
+if (typeof require !== "undefined") {
+    Tuio = require("./Tuio");
 }
 
 Tuio.Time = Tuio.Model.extend({
     seconds: 0,
     microSeconds: 0,
+    //tuio2
+    frameId: 0,
 
     initialize: function(sec, usec) {
         this.seconds = sec || 0;
@@ -21056,6 +21604,14 @@ Tuio.Time = Tuio.Model.extend({
 
     getTotalMilliseconds: function() {
         return this.seconds * 1000 + Math.floor(this.microSeconds / 1000);
+    },
+    // tuio2
+    getFrameId: function() {
+        return this.frameId;
+    },
+    
+    setFrameId: function(frameId) {
+        this.frameId = frameId;
     }
 }, {
     startSeconds: 0,
@@ -21107,4 +21663,4 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":12}]},{},[12,13,14,15,16,17,18,1]);
+},{"./Tuio":12}]},{},[12,13,14,15,16,17,18,19,20,1]);

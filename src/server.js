@@ -35,6 +35,7 @@ var tuio = (function() {
 
     onSocketConnection = function(webSocket) {
         webSocketClients.push(webSocket);
+	console.log("Websocket client connected");
     };
 
     return {
@@ -45,5 +46,5 @@ var tuio = (function() {
 tuio.init({
 	oscPort: 3333,
 	oscHost: "0.0.0.0",
-	socketPort: 5000
+	socketPort: 8080
 });
