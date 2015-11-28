@@ -29,9 +29,9 @@ Tuio.Client = Tuio.Model.extend({
     sourceList: null,
     //tuio2/any-component
     aliveComponentList: null,
-    //tuio2/ptr
-    pointerList: null,
-    framePointers: null,
+    //tuio2 objects
+    objectList: null,
+    frameObjects: null,
     //
     freeCursorList: null,
     maxCursorId: null,
@@ -61,8 +61,8 @@ Tuio.Client = Tuio.Model.extend({
         //tuio2/any-component
         this.aliveComponentList = [];
         //tuio2/ptr
-        this.pointerList = [];
-        this.framePointers = [];
+        this.objectList = [];
+        this.frameObjects = [];
         //
         this.freeCursorList = [];
         this.maxCursorId = -1;
@@ -115,7 +115,14 @@ Tuio.Client = Tuio.Model.extend({
     },
     
     getTuioPointers: function() {
-        return _.clone(this.pointerList);
+        var pointers = [];
+        this.objectList.forEach(function(object) {
+            if (object.pointer) {
+                pointers.push(object.pointer);
+            }
+        });
+        
+        return pointers;
     },
 
     getTuioObject: function(sid) {
@@ -239,29 +246,29 @@ Tuio.Client = Tuio.Model.extend({
         }
         
         //mark all pointers not in the alive list for removal
-        this.pointerList.forEach(function(pointer){
+        this.objectList.forEach(function(pointer){
             if (self.aliveComponentList.indexOf(pointer.getSessionId()) === -1) {
                 pointer.remove(self.frameTime);
-                self.framePointers.push(pointer);
+                self.frameObjects.push(pointer);
             }
         });
         
-        this.framePointers.forEach(function(framePointer){
+        this.frameObjects.forEach(function(framePointer){
             switch(framePointer.getTuioState()) {
                 case Tuio.TUIO_ADDED:
-                    self.pointerList.push(framePointer);
+                    self.objectList.push(framePointer);
                     break;
                 case Tuio.TUIO_REMOVED:
-                    var removeIndex = self.pointerList.indexOf(framePointer);
+                    var removeIndex = self.objectList.indexOf(framePointer);
                     if (removeIndex !== -1) {
-                        self.pointerList.splice(removeIndex, 1);
+                        self.objectList.splice(removeIndex, 1);
                     }
                     break;
             }
         });
         
         //end of frame
-        this.framePointers = [];
+        this.frameObjects = [];
     },
     
     getAliveComponents: function() {
@@ -305,15 +312,26 @@ Tuio.Client = Tuio.Model.extend({
                 pi: -1,
                 source: this.frameSource
             }),
+            object,
             pointer;
         
         if (this.frameSource) {
-            pointer = this.getFramePointer(this.frameSource.getSourceId(), s_id);
+            object = this.getFrameObject(this.frameSource.getSourceId(), s_id);
         }
-        if (typeof pointer === "undefined") {
+        if (typeof object === "undefined") {
+            object = new Tuio.ObjectContainer({
+                ttime: this.frameTime,
+                si: s_id,
+                src: this.frameSource
+            });
+            this.frameObjects.push(object);
+        }
+        
+        pointer = object.getTuioPointer();
+        if (!pointer) {
             pointer = new Tuio.Pointer(pointerCreateParams);
             pointer.setTypeUserId(tu_id);
-            this.framePointers.push(pointer);
+            object.setTuioPointer(pointer);
         }
         else if (pointer.getX() !== xpos ||
                     pointer.getY() !== ypos ||
@@ -327,25 +345,24 @@ Tuio.Client = Tuio.Model.extend({
                     pointer.getPressureAccel() !== paccel ||
                     pointer.getMotionAccel() !== maccel) {
             pointer.update(pointerUpdateParams);
-            this.framePointers.push(pointer);
         }
     },
     
-    getFramePointers: function() {
-        return this.framePointers;
+    getFrameObjects: function() {
+        return this.frameObjects;
     },
     
-    getFramePointer: function(sourceId, sessionId) {
+    getFrameObject: function(sourceId, sessionId) {
         var wantedPointer;
         
-        this.framePointers.forEach(function(framePointer){
+        this.frameObjects.forEach(function(framePointer){
             if (framePointer.getSessionId() === sessionId) {
                 wantedPointer = framePointer;
             }
         });
         
         if (typeof wantedPointer === "undefined") {
-            this.pointerList.forEach(function(activePointer){
+            this.objectList.forEach(function(activePointer){
                 if (typeof activePointer.getTuioSource() !== "undefined" &&
                         activePointer.getTuioSource().getSourceId() === sourceId &&
                         activePointer.getSessionId() === sessionId) {

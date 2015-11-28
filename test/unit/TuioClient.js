@@ -312,15 +312,15 @@ QUnit.test("keeps track of Tuio2 pointers on the current frame", function(assert
     
     arrayBuffer = getPointerBuffer();
     
-    QUnit.equal(client.getFramePointers().length, 0,
+    QUnit.equal(client.getFrameObjects().length, 0,
                 "frameCursor length was not initially zero");
     
     setTimeout( function() {
         server.send(arrayBuffer);
         //check if anything in the framecursors array
-        QUnit.equal(client.getFramePointers().length, 1, "Tuio.Client did not recognize a pointer message")
+        QUnit.equal(client.getFrameObjects().length, 1, "Tuio.Client did not recognize a pointer message")
         //check the actual content
-        assertExamplePointer(client.getFramePointers()[0]);
+        assertExamplePointer(client.getFrameObjects()[0].getTuioPointer());
         asyncDone();
     }, 10);
 });
