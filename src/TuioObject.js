@@ -65,8 +65,8 @@ Tuio.Object = Tuio.Container.extend({
     },
 
     updateObjectState: function() {
-        if ((this.rotationAccel !== 0) && (this.state !== Tuio.Object.TUIO_STOPPED)) {
-            this.state = Tuio.Object.TUIO_ROTATING;
+        if ((this.rotationAccel !== 0) && (this.state !== Tuio.TUIO_STOPPED)) {
+            this.state = Tuio.TUIO_ROTATING;
         }
     },
 
@@ -101,13 +101,12 @@ Tuio.Object = Tuio.Container.extend({
 
     isMoving: function() {
         return (
-            (this.state === Tuio.Object.TUIO_ACCELERATING) ||
-            (this.state === Tuio.Object.TUIO_DECELERATING) ||
-            (this.state === Tuio.Object.TUIO_ROTATING)
+            (this.state === Tuio.TUIO_ACCELERATING) ||
+            (this.state === Tuio.TUIO_DECELERATING) ||
+            (this.state === Tuio.TUIO_ROTATING)
         );
     }
 }, {
-    TUIO_ROTATING: 5,
 
     fromObject: function(tobj) {
         return new Tuio.Object({

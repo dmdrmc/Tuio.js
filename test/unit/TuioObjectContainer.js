@@ -40,7 +40,7 @@
     
     QUnit.test("has the correct ADDED state on construction", function() {
         
-        QUnit.strictEqual(object.getTuioState(), Tuio.Container.TUIO_ADDED,
+        QUnit.strictEqual(object.getTuioState(), Tuio.TUIO_ADDED,
                             "improper state on construction");
     });
     
@@ -61,11 +61,11 @@
         object.setTuioPointer(new Tuio.Pointer());
         object.remove(time);
         
-        QUnit.strictEqual(object.getTuioState(), Tuio.Container.TUIO_REMOVED,
+        QUnit.strictEqual(object.getTuioState(), Tuio.TUIO_REMOVED,
                             "state not set to removed");
         QUnit.ok(object.getTuioTime().equals(time),
                             "new tuio time not properly set");
-        QUnit.strictEqual(object.getTuioPointer().getTuioState(), Tuio.Container.TUIO_REMOVED,
+        QUnit.strictEqual(object.getTuioPointer().getTuioState(), Tuio.TUIO_REMOVED,
                             "object pointer status not set to removed");
     });
     

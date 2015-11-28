@@ -48,7 +48,7 @@ QUnit.test("update", function() {
     QUnit.equal(object.getAngleDegrees(), 180);
     QUnit.equal(object.getRotationSpeed(), 0.1);
     QUnit.equal(object.getRotationAccel(), 0.02);
-    QUnit.equal(object.getTuioState(), Tuio.Object.TUIO_ROTATING);
+    QUnit.equal(object.getTuioState(), Tuio.TUIO_ROTATING);
     ok(object.isMoving());
 
     object.update({

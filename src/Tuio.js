@@ -16,6 +16,15 @@
     }
 
     Tuio.VERSION = "0.0.1";
+    
+    // tuio possible states
+    Tuio.TUIO_ADDED = 0;
+    Tuio.TUIO_ACCELERATING = 1;
+    Tuio.TUIO_DECELERATING = 2;
+    Tuio.TUIO_STOPPED = 3;
+    Tuio.TUIO_REMOVED = 4;
+    Tuio.TUIO_ROTATING = 5;
+    Tuio.TUIO_IDLE = 6;
 
     var _ = root._;
 

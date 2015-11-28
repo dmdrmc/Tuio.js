@@ -29,7 +29,7 @@ QUnit.test("construct", function() {
     QUnit.equal(cursor.getMotionSpeed(), 0);
     QUnit.equal(cursor.getMotionAccel(), 0);
     QUnit.equal(cursor.getPath().length, 1);
-    QUnit.equal(cursor.getTuioState(), Tuio.Container.TUIO_ADDED);
+    QUnit.equal(cursor.getTuioState(), Tuio.TUIO_ADDED);
 });
 
 QUnit.test("fromCursor", function() {
@@ -52,5 +52,5 @@ QUnit.test("fromCursor", function() {
     QUnit.equal(cursor2.getMotionSpeed(), 0);
     QUnit.equal(cursor2.getMotionAccel(), 0);
     QUnit.equal(cursor2.getPath().length, 1);
-    QUnit.equal(cursor2.getTuioState(), Tuio.Container.TUIO_ADDED);
+    QUnit.equal(cursor2.getTuioState(), Tuio.TUIO_ADDED);
 });

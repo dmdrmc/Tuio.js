@@ -22,14 +22,14 @@ Tuio.ObjectContainer = Tuio.Model.extend({
         this.startTime = params.ttime || Tuio.Time.getSystemTime();
         this.currentTime = this.startTime;
         this.source = params.src;
-        this.state = Tuio.Container.TUIO_ADDED;
+        this.state = Tuio.TUIO_ADDED;
     },
     
     remove: function(ttime) {
         if (this.pointer) {
             this.pointer.remove(ttime);
         }
-        this.state = Tuio.Container.TUIO_REMOVED;
+        this.state = Tuio.TUIO_REMOVED;
         this.currentTime = ttime;
     },
     

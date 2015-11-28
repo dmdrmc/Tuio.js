@@ -248,10 +248,10 @@ Tuio.Client = Tuio.Model.extend({
         
         this.framePointers.forEach(function(framePointer){
             switch(framePointer.getTuioState()) {
-                case Tuio.Object.TUIO_ADDED:
+                case Tuio.TUIO_ADDED:
                     self.pointerList.push(framePointer);
                     break;
-                case Tuio.Object.TUIO_REMOVED:
+                case Tuio.TUIO_REMOVED:
                     var removeIndex = self.pointerList.indexOf(framePointer);
                     if (removeIndex !== -1) {
                         self.pointerList.splice(removeIndex, 1);
@@ -451,10 +451,10 @@ Tuio.Client = Tuio.Model.extend({
             for (var i = 0, max = this.frameObjects.length; i < max; i++) {
                 tobj = this.frameObjects[i];
                 switch (tobj.getTuioState()) {
-                    case Tuio.Object.TUIO_REMOVED:
+                    case Tuio.TUIO_REMOVED:
                         this.objectRemoved(tobj);
                         break;
-                    case Tuio.Object.TUIO_ADDED:
+                    case Tuio.TUIO_ADDED:
                         this.objectAdded(tobj);
                         break;
                     default:
@@ -604,10 +604,10 @@ Tuio.Client = Tuio.Model.extend({
             for (var i = 0, max = this.frameCursors.length; i < max; i++) {
                 tcur = this.frameCursors[i];
                 switch (tcur.getTuioState()) {
-                    case Tuio.Cursor.TUIO_REMOVED:
+                    case Tuio.TUIO_REMOVED:
                         this.cursorRemoved(tcur);
                         break;
-                    case Tuio.Cursor.TUIO_ADDED:
+                    case Tuio.TUIO_ADDED:
                         this.cursorAdded(tcur);
                         break;
                     default:

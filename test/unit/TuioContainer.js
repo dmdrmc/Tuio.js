@@ -26,7 +26,7 @@ QUnit.test("initialize with session id and position", function() {
     QUnit.equal(container.getMotionSpeed(), 0);
     QUnit.equal(container.getMotionAccel(), 0);
     QUnit.equal(container.getPath().length, 1);
-    QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_ADDED);
+    QUnit.equal(container.getTuioState(), Tuio.TUIO_ADDED);
 });
 
 QUnit.test("update", function() {
@@ -50,7 +50,7 @@ QUnit.test("update", function() {
     QUnit.equal(container.getMotionSpeed(), 25);
     QUnit.equal(container.getMotionAccel(), 12.5);
     QUnit.equal(container.getPath().length, 2);
-    QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_ACCELERATING);
+    QUnit.equal(container.getTuioState(), Tuio.TUIO_ACCELERATING);
 
     container.update({
         ttime: new Tuio.Time(3, 0),
@@ -58,7 +58,7 @@ QUnit.test("update", function() {
         yp: 0
     });
 
-    QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_DECELERATING);
+    QUnit.equal(container.getTuioState(), Tuio.TUIO_DECELERATING);
 });
 
 QUnit.test("update with velocity and acceleration", function() {
@@ -84,7 +84,7 @@ QUnit.test("update with velocity and acceleration", function() {
     QUnit.equal(container.getYSpeed(), 0);
     QUnit.equal(container.getMotionAccel(), 12.5);
     QUnit.equal(container.getPath().length, 2);
-    QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_ACCELERATING);
+    QUnit.equal(container.getTuioState(), Tuio.TUIO_ACCELERATING);
 });
 
 QUnit.test("stop", function() {
@@ -106,7 +106,7 @@ QUnit.test("stop", function() {
     QUnit.equal(container.getX(), 50);
     QUnit.equal(container.getY(), 0);
     QUnit.equal(container.getMotionSpeed(), 0);
-    QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_DECELERATING);
+    QUnit.equal(container.getTuioState(), Tuio.TUIO_DECELERATING);
 });
 
 QUnit.test("remove", function() {
@@ -118,7 +118,7 @@ QUnit.test("remove", function() {
 
     container.remove(new Tuio.Time(2, 0));
 
-    QUnit.equal(container.getTuioState(), Tuio.Container.TUIO_REMOVED);
+    QUnit.equal(container.getTuioState(), Tuio.TUIO_REMOVED);
     ok(container.getTuioTime().equals(new Tuio.Time(2, 0)));
 });
 

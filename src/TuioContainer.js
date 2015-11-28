@@ -29,7 +29,7 @@ Tuio.Container = Tuio.Point.extend({
             xp: this.xPos,
             yp: this.yPos
         })];
-        this.state = Tuio.Container.TUIO_ADDED;
+        this.state = Tuio.TUIO_ADDED;
     },
 
     update: function(params) {
@@ -81,11 +81,11 @@ Tuio.Container = Tuio.Point.extend({
         }));
 
         if (this.motionAccel > 0) {
-            this.state = Tuio.Container.TUIO_ACCELERATING;
+            this.state = Tuio.TUIO_ACCELERATING;
         } else if (this.motionAccel < 0) {
-            this.state = Tuio.Container.TUIO_DECELERATING;
+            this.state = Tuio.TUIO_DECELERATING;
         } else {
-            this.state = Tuio.Container.TUIO_STOPPED;
+            this.state = Tuio.TUIO_STOPPED;
         }
     },
 
@@ -99,7 +99,7 @@ Tuio.Container = Tuio.Point.extend({
 
     remove: function(ttime) {
         this.currentTime = Tuio.Time.fromTime(ttime);
-        this.state = Tuio.Container.TUIO_REMOVED;
+        this.state = Tuio.TUIO_REMOVED;
     },
 
     getSessionId: function() {
@@ -136,17 +136,11 @@ Tuio.Container = Tuio.Point.extend({
 
     isMoving: function() {
         return (
-            (this.state === Tuio.Container.TUIO_ACCELERATING) ||
-            (this.state === Tuio.Container.TUIO_DECELERATING)
+            (this.state === Tuio.TUIO_ACCELERATING) ||
+            (this.state === Tuio.TUIO_DECELERATING)
         );
     }
 }, {
-    TUIO_ADDED: 0,
-    TUIO_ACCELERATING: 1,
-    TUIO_DECELERATING: 2,
-    TUIO_STOPPED: 3,
-    TUIO_REMOVED: 4,
-
     fromContainer: function(tcon) {
         return new Tuio.Container({
             xp: tcon.getX(),
