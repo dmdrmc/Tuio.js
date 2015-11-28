@@ -35,7 +35,7 @@ var tuio = (function() {
 
     onSocketConnection = function(webSocket) {
         webSocketClients.push(webSocket);
-	console.log("Websocket client connected");
+        console.log("Websocket client connected");
     };
 
     return {

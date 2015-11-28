@@ -21,6 +21,7 @@ Tuio.Pointer = Tuio.Container.extend({
     source: null,
 
     initialize: function(params) {
+        params = params || {};
         Tuio.Container.prototype.initialize.call(this, params);
 
         this.source = params.source;
