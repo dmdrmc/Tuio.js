@@ -24,7 +24,7 @@ QUnit.test("construct", function() {
     QUnit.equal(object.getAngleDegrees(), 180);
     QUnit.equal(object.getRotationSpeed(), 0);
     QUnit.equal(object.getRotationAccel(), 0);
-    ok(!object.isMoving());
+    QUnit.ok(!object.isMoving());
 });
 
 QUnit.test("update", function() {
@@ -49,7 +49,7 @@ QUnit.test("update", function() {
     QUnit.equal(object.getRotationSpeed(), 0.1);
     QUnit.equal(object.getRotationAccel(), 0.02);
     QUnit.equal(object.getTuioState(), Tuio.TUIO_ROTATING);
-    ok(object.isMoving());
+    QUnit.ok(object.isMoving());
 
     object.update({
         ttime: new Tuio.Time(30, 0),
@@ -79,7 +79,7 @@ QUnit.test("stop", function() {
         a: Math.PI / 2
     });
 
-    ok(object.isMoving());
+    QUnit.ok(object.isMoving());
 
     object.stop(new Tuio.Time(50, 0));
 
@@ -87,5 +87,5 @@ QUnit.test("stop", function() {
     QUnit.equal(object.getY(), 20);
     QUnit.equal(object.getAngle(), Math.PI / 2);
     QUnit.equal(object.getRotationSpeed(), 0);
-    ok(object.getTuioTime().equals(new Tuio.Time(50, 0)));
+    QUnit.ok(object.getTuioTime().equals(new Tuio.Time(50, 0)));
 });

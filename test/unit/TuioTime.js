@@ -48,7 +48,7 @@ QUnit.test("equals", function() {
     var time1 = new Tuio.Time.fromMilliseconds(2000),
     time2 = new Tuio.Time.fromMilliseconds(2000);
 
-    ok(time1.equals(time2));
+    QUnit.ok(time1.equals(time2));
     QUnit.equal(time1.getTotalMilliseconds(), time2.getTotalMilliseconds());
 });
 
@@ -67,5 +67,5 @@ QUnit.test("getSessionTime", function() {
     sessionTime = Tuio.Time.getSessionTime(),
     expectedSessionTime = systemTime.subtractTime(startTime);
 
-    ok(sessionTime.equals(expectedSessionTime));
+    QUnit.ok(sessionTime.equals(expectedSessionTime));
 });

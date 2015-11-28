@@ -119,7 +119,7 @@ QUnit.test("remove", function() {
     container.remove(new Tuio.Time(2, 0));
 
     QUnit.equal(container.getTuioState(), Tuio.TUIO_REMOVED);
-    ok(container.getTuioTime().equals(new Tuio.Time(2, 0)));
+    QUnit.ok(container.getTuioTime().equals(new Tuio.Time(2, 0)));
 });
 
 QUnit.test("isMoving", function() {
@@ -136,7 +136,7 @@ QUnit.test("isMoving", function() {
         yp: 0
     });
 
-    ok(container.isMoving());
+    QUnit.ok(container.isMoving());
 
     container.update({
         ttime: new Tuio.Time(3, 0),
@@ -144,5 +144,5 @@ QUnit.test("isMoving", function() {
         yp: 0
     });
 
-    ok(container.isMoving());
+    QUnit.ok(container.isMoving());
 });

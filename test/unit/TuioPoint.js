@@ -27,8 +27,8 @@ QUnit.test("initialize with time and position", function() {
 
     QUnit.equal(point.getX(), 10);
     QUnit.equal(point.getY(), 20);
-    ok(point.currentTime.equals(point.getTuioTime()));
-    ok(point.startTime.equals(point.getStartTime()));
+    QUnit.ok(point.currentTime.equals(point.getTuioTime()));
+    QUnit.ok(point.startTime.equals(point.getStartTime()));
 });
 
 QUnit.test("updateToPoint", function() {
