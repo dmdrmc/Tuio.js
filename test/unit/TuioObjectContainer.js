@@ -133,7 +133,7 @@
             yp: 2
         });
         QUnit.strictEqual(object.isMoving(), true,
-                            "does not indicate is is moving");
+                            "does not indicate it is moving");
     });
     
     QUnit.test("marks the pointer as stopped", function() {

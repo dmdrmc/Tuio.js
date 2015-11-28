@@ -47,12 +47,12 @@ TuioCanvas.Main = (function() {
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         var cursors = client.getTuioCursors(),
-	pointers = client.getTuioPointers(),
+	   pointers = client.getTuioPointers(),
         objects = client.getTuioObjects();
 
-	for(var i in pointers) {
-	    drawCursor(pointers[i])
-	}
+        for(var i in pointers) {
+            drawCursor(pointers[i]);
+        }
 
         for (var i in cursors) {
             drawCursor(cursors[i]);
