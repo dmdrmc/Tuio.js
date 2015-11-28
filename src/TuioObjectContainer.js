@@ -26,11 +26,45 @@ Tuio.ObjectContainer = Tuio.Model.extend({
     },
     
     remove: function(ttime) {
+        this.removeTuioPointer(ttime);
+        this.state = Tuio.TUIO_REMOVED;
+    },
+    
+    update: function(ttime) {
+        this.currentTime = ttime;
+        this.state = Tuio.TUIO_IDLE;
+    },
+    
+    stop: function(ttime) {
+        if (this.pointer) {
+            this.pointer.stop(ttime);
+        }
+        this.currentTime = ttime;
+    },
+    
+    isMoving: function() {
+        return this.constainsTuioPointer() &&
+                    this.pointer.isMoving();
+    },
+    
+    removeTuioPointer: function(ttime) {
         if (this.pointer) {
             this.pointer.remove(ttime);
         }
-        this.state = Tuio.TUIO_REMOVED;
         this.currentTime = ttime;
+    },
+    
+    deleteTuioPointer: function() {
+        this.pointer = null;
+    },
+    
+    constainsTuioPointer: function() {
+        return !!this.pointer;
+    },
+    
+    containsNewTuioPointer: function() {
+        return this.constainsTuioPointer()
+                && this.pointer.getTuioState() === Tuio.TUIO_ADDED;
     },
     
     setTuioPointer: function(pointer) {

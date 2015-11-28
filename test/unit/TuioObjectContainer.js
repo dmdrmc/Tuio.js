@@ -58,6 +58,9 @@
         
         var time = Tuio.Time.getSystemTime();
         
+        QUnit.notOk(object.getTuioTime().equals(time),
+                            "current time equals new time before removal");
+        
         object.setTuioPointer(new Tuio.Pointer());
         object.remove(time);
         
@@ -67,6 +70,85 @@
                             "new tuio time not properly set");
         QUnit.strictEqual(object.getTuioPointer().getTuioState(), Tuio.TUIO_REMOVED,
                             "object pointer status not set to removed");
+    });
+    
+    QUnit.test("deletes a pointer", function() {
+        
+        object.setTuioPointer(new Tuio.Pointer());
+        object.deleteTuioPointer();
+        QUnit.notOk(object.getTuioPointer(), "pointer was not removed from object");
+    });
+    
+    QUnit.test("checks if it contains a pointer", function() {
+        
+        QUnit.strictEqual(object.constainsTuioPointer(), false, 
+                            "does not indicate it contains no pointer");
+        
+        object.setTuioPointer(new Tuio.Pointer());
+        QUnit.strictEqual(object.constainsTuioPointer(), true, 
+                            "does not indicate it contains a pointer");
+        
+    });
+    
+    QUnit.test("checks if it contains a new pointer", function() {
+       
+        var time = Tuio.Time.getSystemTime();
+        
+        QUnit.strictEqual(object.containsNewTuioPointer(), false,
+                            "contains a new pointer when it has no pointer");
+        
+        object.setTuioPointer(new Tuio.Pointer());
+        QUnit.strictEqual(object.containsNewTuioPointer(), true,
+                            "does not contains a freshly added pointer");
+        
+        object.getTuioPointer().updatePathAndState();
+        QUnit.strictEqual(object.containsNewTuioPointer(), false,
+                            "pointer was updated, should not have state ADDED like a new pointer");
+    });
+    
+    QUnit.test("updates the time and state", function() {
+        
+        var time = Tuio.Time.getSystemTime();
+        
+        object.update(time);
+        QUnit.strictEqual(object.getTuioTime().equals(time), true,
+                            "current time does not equal update time");
+        QUnit.strictEqual(object.getTuioState(), Tuio.TUIO_IDLE,
+                            "current state not idle");
+    });
+    
+    QUnit.test("tests if it's moving", function() {
+        
+        var pointer = new Tuio.Pointer({
+            xp: 1,
+            yp: 1
+        })
+        object.setTuioPointer(pointer);
+        
+        QUnit.strictEqual(object.isMoving(), false,
+                            "does not indicate it is not moving when only now set");
+        
+        pointer.update({
+            xp: 2,
+            yp: 2
+        });
+        QUnit.strictEqual(object.isMoving(), true,
+                            "does not indicate is is moving");
+    });
+    
+    QUnit.test("marks the pointer as stopped", function() {
+        
+        var time = Tuio.Time.getSystemTime();
+        
+        object.setTuioPointer(new Tuio.Pointer({
+            xp: 1,
+            yp: 1
+        }));
+        object.stop(time);
+        QUnit.strictEqual(object.getTuioTime().equals(time), true,
+                            "current time not update on stop");
+        QUnit.strictEqual(object.getTuioPointer().isMoving(), false,
+                            "pointer should not be 'moving'");
     });
     
 })();
