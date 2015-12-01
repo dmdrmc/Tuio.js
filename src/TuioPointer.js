@@ -4,10 +4,10 @@ var Tuio = root.Tuio;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
-    Tuio.Container = require("./TuioContainer");
+    Tuio.Component = require("./TuioComponent");
 }
 
-Tuio.Pointer = Tuio.Container.extend({
+Tuio.Pointer = Tuio.Component.extend({
     pointerId: null,
     typeId: null,
     userId: null,
@@ -23,7 +23,7 @@ Tuio.Pointer = Tuio.Container.extend({
 
     initialize: function(params) {
         params = params || {};
-        Tuio.Container.prototype.initialize.call(this, params);
+        Tuio.Component.prototype.initialize.call(this, params);
         
         this.pointerId = params.pi;
         this.typeId = params.ti
@@ -85,7 +85,7 @@ Tuio.Pointer = Tuio.Container.extend({
     update: function(params) {
         params = params || {};
         
-        Tuio.Container.prototype.update.call(this, params);
+        Tuio.Component.prototype.update.call(this, params);
         this.angle = params.a;
         this.shear = params.sa;
         this.radius = params.r;

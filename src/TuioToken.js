@@ -4,15 +4,15 @@ var Tuio = root.Tuio;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
-    Tuio.Container = require("./TuioContainer");
+    Tuio.Component = require("./TuioComponent");
 }
 
-Tuio.Token = Tuio.Container.extend({
+Tuio.Token = Tuio.Component.extend({
     symbolId: null,
     
     initialize: function(params) {
         params = params || {};
-        Tuio.Container.prototype.initialize.call(this, params);
+        Tuio.Component.prototype.initialize.call(this, params);
         
         this.symbolId = params.sym;
         this.typeId = params.ti;
