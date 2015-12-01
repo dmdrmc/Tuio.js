@@ -9,6 +9,8 @@ if (typeof require !== "undefined") {
 
 Tuio.Token = Tuio.Component.extend({
     symbolId: null,
+    typeId: null,
+    userId: null,
     
     initialize: function(params) {
         params = params || {};

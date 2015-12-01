@@ -12,14 +12,11 @@ Tuio.Pointer = Tuio.Component.extend({
     typeId: null,
     userId: null,
     componentId: null,
-    angle: null,
     shear: null,
     radius: null,
     pressure: null,
     pressureSpeed: null,
     pressureAccel: null,
-    //reference to the object that contains the pointer
-    object: null,
 
     initialize: function(params) {
         params = params || {};
@@ -29,20 +26,12 @@ Tuio.Pointer = Tuio.Component.extend({
         this.typeId = params.ti
         this.userId = params.ui;
         this.componentId = params.ci;
-        this.angle = params.a;
         this.shear = params.sa;
         this.radius = params.r;
         this.pressure = params.p;
         this.pressureSpeed = params.ps;
         this.pressureAccel = params.pa;
-        this.object = params.tobj;
     },
-
-    getSessionId: function() {
-        if (typeof this.object !== "undefined") {
-            return this.object.getSessionId();
-        }
-    },    
     getPointerId: function() {
         return this.pointerId;
     },
@@ -54,9 +43,6 @@ Tuio.Pointer = Tuio.Component.extend({
     },
     getComponentId: function() {
         return this.componentId;
-    },
-    getAngle: function() {
-        return this.angle;
     },
     getShear: function() {
         return this.shear;
@@ -86,7 +72,6 @@ Tuio.Pointer = Tuio.Component.extend({
         params = params || {};
         
         Tuio.Component.prototype.update.call(this, params);
-        this.angle = params.a;
         this.shear = params.sa;
         this.radius = params.r;
         this.pressure = params.p;
