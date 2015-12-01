@@ -308,7 +308,6 @@ Tuio.Client = Tuio.Model.extend({
                 pa: paccel
             },
             pointerCreateParams = _.extend({}, pointerUpdateParams, {
-                si: s_id,
                 pi: -1,
                 source: this.frameSource
             }),

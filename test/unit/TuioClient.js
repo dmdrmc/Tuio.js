@@ -153,8 +153,6 @@ function assertExamplePointer(pointerInstance, params) {
     QUnit.equal(pointerInstance.getPointerId(), -1);
     QUnit.equal(pointerInstance.getTypeId(), 15);
     QUnit.equal(pointerInstance.getUserId(), 7);
-    QUnit.equal(pointerInstance.getSessionId(), sessionId,
-                    "sessionId of the pointer does not match");
     QUnit.equal(pointerInstance.getX(), 5);
     QUnit.equal(pointerInstance.getY(), 6);
     QUnit.equal(pointerInstance.getAngle(), 7);
@@ -539,6 +537,20 @@ QUnit.test("uses only the last alive message to store active sessions", function
         server.send(aliveSessionsBuffer);
         QUnit.equal(client.getAliveComponents().length, 1,
                     "alive session does not contain one item");
+        asyncDone();
+    }, 10);
+});
+
+QUnit.test("stores session id in the object, not pointer", function(assert) {
+    
+    var asyncDone = assert.async();
+    
+    client.connect();
+    
+    setTimeout(function() {
+        sendBundle();
+        QUnit.strictEqual(client.getTuioObjects()[0].getSessionId(), 1);
+        
         asyncDone();
     }, 10);
 });
