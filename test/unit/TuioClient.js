@@ -589,7 +589,7 @@ QUnit.test("adds pointer to active list when pointer alive", function(assert) {
         QUnit.equal(client.getTuioPointers().length, 1,
                     "current pointer not added to the active list");
         
-        //assertExamplePointer(client.getTuioPointers()[0]);
+        assertExamplePointer(client.getTuioPointers()[0]);
         asyncDone();
     }, 10);
 });
