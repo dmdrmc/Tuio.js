@@ -37,7 +37,11 @@ Tuio.Token = Tuio.Component.extend({
             ui: ttok.getUserId(),
             sym: ttok.getSymbolId(),
             xp: ttok.getX(),
-            yp: ttok.getY()
+            yp: ttok.getY(),
+            rs: ttok.getRotationSpeed(),
+            ra: ttok.getRotationAccel(),
+            tobj: ttok.getContainingTuioObject(),
+            a: ttok.getAngle()
         });
     }
 });

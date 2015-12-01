@@ -13,7 +13,11 @@ QUnit.module("Tuio.Token", {
             ui: 134,
             sym: 5,
             xp: 10,
-            yp: 20
+            yp: 20,
+            rs: 11,
+            ra: 12,
+            tobj: 2, //actually an object
+            a: 3,
         });
     },
 
@@ -31,9 +35,11 @@ QUnit.test("constructs", function(assert) {
     QUnit.equal(token.getY(), 20);
     QUnit.equal(token.getXSpeed(), 0);
     QUnit.equal(token.getYSpeed(), 0);
-    QUnit.equal(token.getMotionSpeed(), 0);
-    QUnit.equal(token.getMotionAccel(), 0);
+    QUnit.equal(token.getRotationSpeed(), 11);
+    QUnit.equal(token.getRotationAccel(), 12);
+    QUnit.equal(token.getContainingTuioObject(), 2);
     QUnit.equal(token.getPath().length, 1);
+    QUnit.equal(token.getAngle(), 3);
 });
 
 QUnit.test("fromToken", function() {

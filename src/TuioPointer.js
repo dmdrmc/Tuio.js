@@ -90,7 +90,8 @@ Tuio.Pointer = Tuio.Component.extend({
             a: tptr.getAngle(),
             sa: tptr.getShear(),
             r: tptr.getRadius(),
-            p: tptr.getPressure()
+            p: tptr.getPressure(),
+            tobj: tptr.getContainingTuioObject(),
         });
     }
 });

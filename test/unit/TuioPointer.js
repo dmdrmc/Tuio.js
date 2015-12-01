@@ -19,7 +19,8 @@ QUnit.module("Tuio.Pointer", {
             a: 3.14,
             sa: 6,
             r: 11,
-            p: 0
+            p: 0,
+            tobj: 3, //actually an object
         });
     },
 
@@ -46,6 +47,7 @@ QUnit.test("constructs", function(assert) {
     QUnit.equal(pointer.getShear(), 6);
     QUnit.equal(pointer.getRadius(), 11);
     QUnit.strictEqual(pointer.getPressure(), 0);
+    QUnit.strictEqual(pointer.getContainingTuioObject(), 3);
 });
 
 QUnit.test("fromPointer", function() {
