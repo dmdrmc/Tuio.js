@@ -18,13 +18,12 @@ Tuio.Pointer = Tuio.Container.extend({
     pressure: null,
     pressureSpeed: null,
     pressureAccel: null,
-    source: null,
+    //reference to the object that contains the pointer
+    object: null,
 
     initialize: function(params) {
         params = params || {};
         Tuio.Container.prototype.initialize.call(this, params);
-
-        this.source = params.source;
         
         this.pointerId = params.pi;
         this.typeId = params.ti
@@ -36,8 +35,14 @@ Tuio.Pointer = Tuio.Container.extend({
         this.pressure = params.p;
         this.pressureSpeed = params.ps;
         this.pressureAccel = params.pa;
+        this.object = params.tobj;
     },
 
+    getSessionId: function() {
+        if (typeof this.object !== "undefined") {
+            return this.object.getSessionId();
+        }
+    },    
     getPointerId: function() {
         return this.pointerId;
     },
@@ -68,9 +73,6 @@ Tuio.Pointer = Tuio.Container.extend({
     getPressureAccel: function() {
         return this.pressureAccel;
     },
-    getTuioSource: function() {
-        return this.source;
-    },
     setTypeUserId: function(tu_id) {
         var arrayBuffer = new ArrayBuffer(4),
             bufferView = new DataView(arrayBuffer);
@@ -94,7 +96,6 @@ Tuio.Pointer = Tuio.Container.extend({
 }, { 
     fromPointer: function(tptr) {
         return new Tuio.Pointer({
-            si: tptr.getSessionId(),
             ti: tptr.getTypeId(),
             ui: tptr.getUserId(),
             pi: tptr.getPointerId(),

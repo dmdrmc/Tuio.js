@@ -9,7 +9,6 @@ QUnit.module("Tuio.Pointer", {
     setup: function() {
         pointer = new Tuio.Pointer({
             ttime: new Tuio.Time(),
-            si: 1,
             ti: 34,
             ui: 134,
             pi: 5,
@@ -34,7 +33,6 @@ QUnit.test("constructs", function(assert) {
     QUnit.equal(pointer.getPointerId(), 5);
     QUnit.equal(pointer.getTypeId(), 34);
     QUnit.equal(pointer.getUserId(), 134);
-    QUnit.equal(pointer.getSessionId(), 1);
     QUnit.equal(pointer.getX(), 10);
     QUnit.equal(pointer.getY(), 20);
     QUnit.equal(pointer.getXSpeed(), 0);

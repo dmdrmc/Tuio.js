@@ -40,6 +40,7 @@ Tuio.Client = Tuio.Model.extend({
     oscReceiver: null,
     // last frame info
     frameSource: null,
+    sourceCount: null,
     frameTime: null,
     lateFrame: null,
 
@@ -72,6 +73,7 @@ Tuio.Client = Tuio.Model.extend({
             url: this.host
         });
         //
+        this.sourceCount = 0;
         this.lateFrame = false;
 
         _.bindAll(this, "onConnect", "acceptBundle", "acceptMessage", "onDisconnect");
@@ -115,9 +117,13 @@ Tuio.Client = Tuio.Model.extend({
     },
     
     getTuioPointers: function() {
-        var pointers = [];
+        var self = this,
+            pointers = [];
+        
         this.objectList.forEach(function(object) {
-            if (object.pointer) {
+            if (object.pointer &&
+                    self.frameSource && 
+                    object.getTuioSource().getSourceString() === self.frameSource.getSourceString()) {
                 pointers.push(object.pointer);
             }
         });
@@ -217,9 +223,11 @@ Tuio.Client = Tuio.Model.extend({
             this.frameSource = new Tuio.Source({
                 frameId: frameId,
                 dimension: dimension,
-                sourceString: sourceString
+                sourceString: sourceString,
+                sourceId: this.sourceCount
             });
             this.sourceList[sourceString] = this.frameSource;
+            this.sourceCount += 1;
         }
         // time to set
         this.frameTime = new Tuio.Time.fromMilliseconds(timetag.native*1000);
@@ -325,6 +333,7 @@ Tuio.Client = Tuio.Model.extend({
             });
             this.frameObjects.push(object);
         }
+        pointerCreateParams.tobj = object;
         
         pointer = object.getTuioPointer();
         if (!pointer) {

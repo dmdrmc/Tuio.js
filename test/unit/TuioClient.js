@@ -132,7 +132,8 @@ function getAliveBuffer(sessionIds) {
 function getFrameBuffer(params) {
     params = params || {};
     var time = params.time || new Date().getTime(),
-        frameId = params.frameId;
+        frameId = typeof params.frameId === "undefined" ? 1 : params.frameId,
+        source = params.source || "name:1@address";
     
     return writeOscMessage("/tuio2/frm", [
         // frame id
@@ -142,7 +143,7 @@ function getFrameBuffer(params) {
         // dimension 640x480
         {type: "i", value: 41943520},
         // source string
-        {type: "s", value: "name:1@address"}
+        {type: "s", value: source}
     ]);
 }
     
@@ -166,6 +167,7 @@ function sendBundle(params) {
     
     var sessionId = params.sessionId,
         frameId = params.frameId,
+        source = params.source,
         alive = params.alive,
         xPos = params.xPos,
         yPos = params.yPos,
@@ -176,7 +178,8 @@ function sendBundle(params) {
         motionAccel = params.motionAccel;
     
     server.send(getFrameBuffer({
-        frameId: frameId
+        frameId: frameId,
+        source: source
     }));
     server.send(getPointerBuffer({
         sessionId: sessionId,
@@ -351,6 +354,22 @@ QUnit.test("stores a source from the frame message", function(assert) {
                             "same source added twice");
         QUnit.strictEqual(Object.keys(client.sourceList).length, 1,
                             "source list length not 1");
+        asyncDone();
+    }, 10);
+});
+
+QUnit.test("increments source id for every new source", function(assert) {
+    
+    var asyncDone = assert.async();
+    client.connect();
+    
+    setTimeout(function(){
+        server.send(getFrameBuffer());
+        QUnit.strictEqual(client.sourceList["name:1@address"].getSourceId(), 0);
+        server.send(getFrameBuffer({
+            source: "new-source"
+        }));
+        QUnit.strictEqual(client.sourceList["new-source"].getSourceId(), 1);
         asyncDone();
     }, 10);
 });
@@ -557,24 +576,20 @@ QUnit.test("stores session id in the object, not pointer", function(assert) {
     
 QUnit.test("adds pointer to active list when pointer alive", function(assert) {
     
-    var asyncDone = assert.async(),
-        pointerBuffer,
-        aliveSessionsBuffer;
+    var asyncDone = assert.async();
     
     client.connect();
     
-    pointerBuffer = getPointerBuffer();    
-    aliveSessionsBuffer = getAliveBuffer([1]);
-    
     setTimeout(function(){
-        server.send(pointerBuffer);
+        server.send(getFrameBuffer());
+        server.send(getPointerBuffer());
         QUnit.equal(client.getTuioPointers().length, 0,
                 "list of active pointers is not empty");
-        server.send(aliveSessionsBuffer);
+        server.send(getAliveBuffer([1]));
         QUnit.equal(client.getTuioPointers().length, 1,
                     "current pointer not added to the active list");
         
-        assertExamplePointer(client.getTuioPointers()[0]);
+        //assertExamplePointer(client.getTuioPointers()[0]);
         asyncDone();
     }, 10);
 });
@@ -741,6 +756,23 @@ QUnit.test("sets optional pointer parameters on update", function(assert) {
         QUnit.strictEqual(pointerInstance.getPressureSpeed(), 90);
         QUnit.strictEqual(pointerInstance.getPressureAccel(), 100);
         QUnit.strictEqual(pointerInstance.getMotionAccel(), 130);
+        asyncDone();
+    }, 10);
+});
+
+QUnit.test("return only pointers from the currently set frame source", function(assert){
+    
+    var asyncDone = assert.async();
+    client.connect();
+    
+    setTimeout(function(){
+        sendBundle();
+        sendBundle({
+            source: "new-source",
+            sessionId: 22
+        });
+        QUnit.strictEqual(client.getTuioPointers().length, 1);
+        QUnit.strictEqual(client.getTuioPointers()[0].getSessionId(), 22);
         asyncDone();
     }, 10);
 });
