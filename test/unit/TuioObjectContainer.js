@@ -81,11 +81,11 @@
     
     QUnit.test("checks if it contains a pointer", function() {
         
-        QUnit.strictEqual(object.constainsTuioPointer(), false, 
+        QUnit.strictEqual(object.containsTuioPointer(), false, 
                             "does not indicate it contains no pointer");
         
         object.setTuioPointer(new Tuio.Pointer());
-        QUnit.strictEqual(object.constainsTuioPointer(), true, 
+        QUnit.strictEqual(object.containsTuioPointer(), true, 
                             "does not indicate it contains a pointer");
         
     });
@@ -149,6 +149,61 @@
                             "current time not update on stop");
         QUnit.strictEqual(object.getTuioPointer().isMoving(), false,
                             "pointer should not be 'moving'");
+    });
+    
+    QUnit.test("stores a token", function() {
+        
+        QUnit.strictEqual(object.getTuioToken(), null,
+                            "Tuio.Token was incorrectly set");
+        
+        object.setTuioToken(new Tuio.Token());
+        QUnit.ok(object.getTuioToken() instanceof Tuio.Token,
+                    "tuio token not set");
+    });
+    
+    QUnit.test("marks a token for removal", function() {
+        
+        var time = Tuio.Time.getSystemTime();
+        
+        object.setTuioToken(new Tuio.Token());
+        object.remove(time);
+        
+        QUnit.strictEqual(object.getTuioToken().getTuioState(), Tuio.TUIO_REMOVED,
+                            "object token status not set to removed");
+    });
+    
+    QUnit.test("deletes a pointer", function() {
+        
+        object.setTuioToken(new Tuio.Token());
+        object.deleteTuioToken();
+        QUnit.notOk(object.getTuioToken(), "token was not removed from object");
+    });
+    
+    QUnit.test("checks if it contains a token", function() {
+        
+        QUnit.strictEqual(object.containsTuioToken(), false, 
+                            "does not indicate it contains no token");
+        
+        object.setTuioToken(new Tuio.Token());
+        QUnit.strictEqual(object.containsTuioToken(), true, 
+                            "does not indicate it contains a token");
+        
+    });
+    
+    QUnit.test("checks if it contains a new token", function() {
+       
+        var time = Tuio.Time.getSystemTime();
+        
+        QUnit.strictEqual(object.containsNewTuioToken(), false,
+                            "contains a new token when it has no token");
+        
+        object.setTuioToken(new Tuio.Token());
+        QUnit.strictEqual(object.containsNewTuioToken(), true,
+                            "does not contains a freshly added token");
+        
+        object.getTuioToken().updatePathAndState();
+        QUnit.strictEqual(object.containsNewTuioToken(), false,
+                            "token was updated, should not have state ADDED like a new token");
     });
     
 })();

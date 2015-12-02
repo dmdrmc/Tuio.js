@@ -48,9 +48,9 @@ Tuio.ObjectContainer = Tuio.Model.extend({
     },
     
     isMoving: function() {
-        return (this.constainsTuioPointer() &&
+        return (this.containsTuioPointer() &&
                     this.pointer.isMoving()) ||
-                (this.constainsTuioPointer() &&
+                (this.containsTuioPointer() &&
                     this.pointer.isMoving());
     },
     
@@ -65,12 +65,12 @@ Tuio.ObjectContainer = Tuio.Model.extend({
         this.pointer = null;
     },
     
-    constainsTuioPointer: function() {
+    containsTuioPointer: function() {
         return !!this.pointer;
     },
     
     containsNewTuioPointer: function() {
-        return this.constainsTuioPointer()
+        return this.containsTuioPointer()
                 && this.pointer.getTuioState() === Tuio.TUIO_ADDED;
     },
     
@@ -93,12 +93,12 @@ Tuio.ObjectContainer = Tuio.Model.extend({
         this.token = null;
     },
     
-    constainsTuioToken: function() {
+    containsTuioToken: function() {
         return !!this.token;
     },
     
     containsNewTuioToken: function() {
-        return this.constainsTuioToken()
+        return this.containsTuioToken()
                 && this.token.getTuioState() === Tuio.TUIO_ADDED;
     },
                                          
