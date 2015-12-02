@@ -319,6 +319,7 @@ Tuio.Client = Tuio.Model.extend({
             pspeed = args[11],
             maccel = args[12],
             paccel = args[13],
+            object = this.obtainFrameObject(s_id),
             pointerUpdateParams = {
                 xp: xpos,
                 yp: ypos,
@@ -335,23 +336,10 @@ Tuio.Client = Tuio.Model.extend({
             },
             pointerCreateParams = _.extend({}, pointerUpdateParams, {
                 pi: -1,
-                source: this.frameSource
+                source: this.frameSource,
+                tobj: object
             }),
-            object,
             pointer;
-        
-        if (this.frameSource) {
-            object = this.getFrameObject(this.frameSource.getSourceId(), s_id);
-        }
-        if (typeof object === "undefined") {
-            object = new Tuio.ObjectContainer({
-                ttime: this.frameTime,
-                si: s_id,
-                src: this.frameSource
-            });
-            this.frameObjects.push(object);
-        }
-        pointerCreateParams.tobj = object;
         
         pointer = object.getTuioPointer();
         if (!pointer) {
@@ -386,6 +374,7 @@ Tuio.Client = Tuio.Model.extend({
             rspeed = args[11],
             maccel = args[12],
             raccel = args[13],
+            object = this.obtainFrameObject(s_id),
             tokenUpdateParams = {
                 xp: xpos,
                 yp: ypos,
@@ -399,23 +388,10 @@ Tuio.Client = Tuio.Model.extend({
             },
             tokenCreateParams = _.extend({}, tokenUpdateParams, {
                 sym: -1,
-                source: this.frameSource
+                source: this.frameSource,
+                tobj: object
             }),
-            object,
             token;
-        
-        if (this.frameSource) {
-            object = this.getFrameObject(this.frameSource.getSourceId(), s_id);
-        }
-        if (typeof object === "undefined") {
-            object = new Tuio.ObjectContainer({
-                ttime: this.frameTime,
-                si: s_id,
-                src: this.frameSource
-            });
-            this.frameObjects.push(object);
-        }
-        tokenCreateParams.tobj = object;
         
         token = object.getTuioToken();
         if (!token) {
@@ -437,6 +413,24 @@ Tuio.Client = Tuio.Model.extend({
     
     getFrameObjects: function() {
         return this.frameObjects;
+    },
+    
+    obtainFrameObject: function(sessionId) {
+        var object;
+        
+        if (this.frameSource) {
+            object = this.getFrameObject(this.frameSource.getSourceId(), sessionId);
+        }
+        if (typeof object === "undefined") {
+            object = new Tuio.ObjectContainer({
+                ttime: this.frameTime,
+                si: sessionId,
+                src: this.frameSource
+            });
+            this.frameObjects.push(object);
+        }
+        
+        return object;
     },
     
     getFrameObject: function(sourceId, sessionId) {
