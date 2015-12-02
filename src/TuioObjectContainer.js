@@ -28,6 +28,7 @@ Tuio.ObjectContainer = Tuio.Model.extend({
     
     remove: function(ttime) {
         this.removeTuioPointer(ttime);
+        this.removeTuioToken(ttime);
         this.state = Tuio.TUIO_REMOVED;
     },
     
@@ -40,12 +41,17 @@ Tuio.ObjectContainer = Tuio.Model.extend({
         if (this.pointer) {
             this.pointer.stop(ttime);
         }
+        if (this.token) {
+            this.token.stop(ttime);
+        }
         this.currentTime = ttime;
     },
     
     isMoving: function() {
-        return this.constainsTuioPointer() &&
-                    this.pointer.isMoving();
+        return (this.constainsTuioPointer() &&
+                    this.pointer.isMoving()) ||
+                (this.constainsTuioPointer() &&
+                    this.pointer.isMoving());
     },
     
     removeTuioPointer: function(ttime) {
@@ -72,16 +78,36 @@ Tuio.ObjectContainer = Tuio.Model.extend({
         this.pointer = pointer;
     },
                                          
+    getTuioPointer: function() {
+        return this.pointer;
+    },
+    
+    removeTuioToken: function(ttime) {
+        if (this.token) {
+            this.token.remove(ttime);
+        }
+        this.currentTime = ttime;
+    },
+    
+    deleteTuioToken: function() {
+        this.token = null;
+    },
+    
+    constainsTuioToken: function() {
+        return !!this.token;
+    },
+    
+    containsNewTuioToken: function() {
+        return this.constainsTuioToken()
+                && this.token.getTuioState() === Tuio.TUIO_ADDED;
+    },
+                                         
     getTuioToken: function() {
         return this.token;
     },
     
     setTuioToken: function(token) {
         this.token = token;
-    },
-                                         
-    getTuioPointer: function() {
-        return this.pointer;
     },
     
     getSessionId: function() {

@@ -245,24 +245,18 @@ function sendTokenBundle(params) {
         xPos = params.xPos,
         yPos = params.yPos,
         xSpeed = params.xSpeed,
-        ySpeed = params.ySpeed,
-        pressureSpeed = params.pressureSpeed,
-        pressureAccel = params.pressureAccel,
-        motionAccel = params.motionAccel;
+        ySpeed = params.ySpeed
     
     server.send(getFrameBuffer({
         frameId: frameId,
         source: source
     }));
-    server.send(getPointerBuffer({
+    server.send(getTokenBuffer({
         sessionId: sessionId,
         xPos: xPos,
         yPos: yPos,
         xSpeed: xSpeed,
-        ySpeed: ySpeed,
-        pressureSpeed: pressureSpeed,
-        motionAccel: motionAccel,
-        pressureAccel: pressureAccel,
+        ySpeed: ySpeed
     }));
     server.send(getAliveBuffer(params.alive));
 }
@@ -868,6 +862,120 @@ QUnit.test("adds token to active list when token alive", function(assert) {
                     "current token not added to the active list");
         QUnit.equal(client.getTuioTokens()[0].getSessionId(), 10,
                         "getTuioTokens returned wrong token");
+        asyncDone();
+    }, 10);
+});
+    
+QUnit.test("adds multiple tokens to active list sequentially", function(assert) {
+    
+    var asyncDone = assert.async();
+    
+    client.connect();
+    
+    setTimeout(function(){
+        sendTokenBundle({
+            sessionId: 1,
+            alive: [1]
+        });
+        // add second token
+        sendTokenBundle({
+            sessionId: 2,
+            alive: [1,2]
+        });
+        // test
+        QUnit.equal(client.getTuioTokens().length, 2,
+                "there should currently be 2 active tokens");
+        QUnit.equal(client.getTuioTokens()[0].getSessionId(), 1,
+                        "getTuioTokens returned wrong first token");
+        QUnit.equal(client.getTuioTokens()[1].getSessionId(), 2,
+                        "getTuioTokens returned wrong second token");
+        asyncDone();
+    }, 10);
+});
+    
+QUnit.test("removes token from active list when token no longer active", function(assert) {
+    
+    var asyncDone = assert.async();
+    
+    client.connect();
+    
+    setTimeout(function(){
+        sendTokenBundle({
+            sessionId: 1,
+            frameId: 1,
+            alive: [1]
+        });
+        sendTokenBundle({
+            sessionId: 2,
+            frameId: 2,
+            alive: [2]
+        });
+        QUnit.notStrictEqual(client.getTuioTokens().length, 2,
+                    "first token was not removed");
+        QUnit.strictEqual(client.getTuioTokens().length, 1,
+                    "pointer 2 is not active");
+        QUnit.equal(client.getTuioTokens()[0].getSessionId(), 2,
+                        "getTuioTokens returned wrong token");
+        asyncDone();
+    }, 10);
+});
+    
+QUnit.test("updates existing pointer in the pointer list, if it already exists", function(assert) {
+    
+    var asyncDone = assert.async(),
+        tokenInstance,
+        sessionId = 10;
+    
+    client.connect();
+    
+    setTimeout(function(){
+        
+        sendTokenBundle({
+            frameId: 1,
+            alive: [sessionId],
+            sessionId: sessionId,
+            xPos: 1,
+            yPos: 1 
+        });
+        // change
+        sendTokenBundle({
+            frameId: 2,
+            alive: [sessionId],
+            sessionId: sessionId,
+            xPos: 100,
+            yPos: 200
+        });
+        // the length stays 1, pointer 1 was only updated
+        QUnit.strictEqual(client.getTuioTokens().length, 1,
+                    "first pointer was not removed");
+
+        tokenInstance = client.getTuioTokens()[0];
+        QUnit.strictEqual(tokenInstance.getX(), 100,
+                            "pointer x position not properly updated");
+        QUnit.strictEqual(tokenInstance.getY(), 200,
+                            "pointer y position not properly updated");
+        QUnit.strictEqual(tokenInstance.getPath().length, 2,
+                            "pointer path not properly updated");
+        QUnit.notStrictEqual(tokenInstance.getXSpeed(), 0);
+        QUnit.notStrictEqual(tokenInstance.getXSpeed(), Infinity);
+        QUnit.notStrictEqual(tokenInstance.getYSpeed(), 0);
+        asyncDone();
+    }, 10);
+});
+
+QUnit.test("return only tokens from the currently set frame source", function(assert){
+    
+    var asyncDone = assert.async();
+    client.connect();
+    
+    setTimeout(function(){
+        sendTokenBundle();
+        sendTokenBundle({
+            source: "new-source",
+            sessionId: 22
+        });
+        QUnit.strictEqual(client.getTuioTokens().length, 1);
+        QUnit.strictEqual(client.getTuioTokens()[0].getSessionId(), 22);
         asyncDone();
     }, 10);
 });
