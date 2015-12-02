@@ -130,6 +130,21 @@ Tuio.Client = Tuio.Model.extend({
         
         return pointers;
     },
+    
+    getTuioTokens: function() {
+        var self = this,
+            tokens = [];
+        
+        this.objectList.forEach(function(object) {
+            if (object.token &&
+                    self.frameSource && 
+                    object.getTuioSource().getSourceString() === self.frameSource.getSourceString()) {
+                tokens.push(object.token);
+            }
+        });
+        
+        return tokens;
+    },
 
     getTuioObject: function(sid) {
         return this.objectList[sid];
@@ -174,6 +189,9 @@ Tuio.Client = Tuio.Model.extend({
                 break;
             case "/tuio2/ptr":
                 this.handlePointerMessage(messageArgs);
+                break;
+            case "/tuio2/tok":
+                this.handleTokenMessage(messageArgs);
                 break;
             case "/tuio2/alv":
                 this.handleAliveMessage(messageArgs);
@@ -355,6 +373,67 @@ Tuio.Client = Tuio.Model.extend({
             pointer.update(pointerUpdateParams);
         }
     },
+    
+    handleTokenMessage: function(args) {
+        var s_id = args[0],
+            tu_id = args[1],
+            c_id = args[2],
+            xpos = args[3],
+            ypos = args[4],
+            angle = args[5],
+            xspeed = args[9],
+            yspeed = args[10],
+            rspeed = args[11],
+            maccel = args[12],
+            raccel = args[13],
+            tokenUpdateParams = {
+                xp: xpos,
+                yp: ypos,
+                a: angle,
+                ttime: this.frameTime,
+                xs: xspeed,
+                ys: yspeed,
+                rs: rspeed,
+                ma: maccel,
+                ra: raccel
+            },
+            tokenCreateParams = _.extend({}, tokenUpdateParams, {
+                sym: -1,
+                source: this.frameSource
+            }),
+            object,
+            token;
+        
+        if (this.frameSource) {
+            object = this.getFrameObject(this.frameSource.getSourceId(), s_id);
+        }
+        if (typeof object === "undefined") {
+            object = new Tuio.ObjectContainer({
+                ttime: this.frameTime,
+                si: s_id,
+                src: this.frameSource
+            });
+            this.frameObjects.push(object);
+        }
+        tokenCreateParams.tobj = object;
+        
+        token = object.getTuioToken();
+        if (!token) {
+            token = new Tuio.Token(tokenCreateParams);
+            token.setTypeUserId(tu_id);
+            object.setTuioToken(token);
+        }
+        else if (token.getX() !== xpos ||
+                    token.getY() !== ypos ||
+                    token.getAngle() !== angle ||
+                    token.getXSpeed() !== xspeed ||
+                    token.getYSpeed() !== yspeed ||
+                    token.getRotationSpeed() !== rspeed ||
+                    token.getRotationAccel() !== raccel ||
+                    token.getMotionAccel() !== maccel) {
+            token.update(tokenUpdateParams);
+        }
+    },    
     
     getFrameObjects: function() {
         return this.frameObjects;

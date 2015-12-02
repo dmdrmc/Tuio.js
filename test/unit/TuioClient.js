@@ -117,6 +117,47 @@ function getPointerBuffer(params) {
     return writeOscMessage("/tuio2/ptr", messageParams);
 }
     
+function getTokenBuffer(params) {
+    params = params || {};
+    var sessionId = params.sessionId || 1,
+        xPos = params.xPos || 5,
+        yPos = params.yPos || 6,
+        messageParams = [
+            //session id
+            {type: "i", value: sessionId},
+            //tu_id, two 16-bit values
+            //t_id => 15, u_id => 7
+            // 0x00 0x0f 0x00 0x07 => big endian 983047
+            {type: "i", value: 983047},
+            // component id
+            {type: "i", value: 4},
+            // x_pos
+            {type: "f", value: xPos},
+            // y_pos
+            {type: "f", value: yPos},
+            // angle
+            {type: "f", value: 7},
+        ],
+        optionalMessageParams = [
+            params.xSpeed,
+            params.ySpeed,
+            params.rotationSpeed,
+            params.motionAccel,
+            params.rotationAccel
+        ];
+    
+    optionalMessageParams.forEach(function(optionalParam){
+        if (typeof optionalParam !== "undefined") {
+            messageParams.push({
+                type: "f", 
+                value: optionalParam
+            });
+        }
+    });
+
+    return writeOscMessage("/tuio2/tok", messageParams);
+}
+    
 function getAliveBuffer(sessionIds) {
     sessionIds = sessionIds || [1];
     var oscArgs = sessionIds.map(function(id) {
@@ -162,7 +203,39 @@ function assertExamplePointer(pointerInstance, params) {
     QUnit.equal(pointerInstance.getPressure(), 10);
 }
     
-function sendBundle(params) {
+function sendPointerBundle(params) {
+    params = params || {};
+    
+    var sessionId = params.sessionId,
+        frameId = params.frameId,
+        source = params.source,
+        alive = params.alive,
+        xPos = params.xPos,
+        yPos = params.yPos,
+        xSpeed = params.xSpeed,
+        ySpeed = params.ySpeed,
+        pressureSpeed = params.pressureSpeed,
+        pressureAccel = params.pressureAccel,
+        motionAccel = params.motionAccel;
+    
+    server.send(getFrameBuffer({
+        frameId: frameId,
+        source: source
+    }));
+    server.send(getPointerBuffer({
+        sessionId: sessionId,
+        xPos: xPos,
+        yPos: yPos,
+        xSpeed: xSpeed,
+        ySpeed: ySpeed,
+        pressureSpeed: pressureSpeed,
+        motionAccel: motionAccel,
+        pressureAccel: pressureAccel,
+    }));
+    server.send(getAliveBuffer(params.alive));
+}
+    
+function sendTokenBundle(params) {
     params = params || {};
     
     var sessionId = params.sessionId,
@@ -567,7 +640,7 @@ QUnit.test("stores session id in the object, not pointer", function(assert) {
     client.connect();
     
     setTimeout(function() {
-        sendBundle();
+        sendPointerBundle();
         QUnit.strictEqual(client.getTuioObjects()[0].getSessionId(), 1);
         
         asyncDone();
@@ -601,12 +674,12 @@ QUnit.test("adds multiple pointers to active list sequentially", function(assert
     client.connect();
     
     setTimeout(function(){
-        sendBundle({
+        sendPointerBundle({
             sessionId: 1,
             alive: [1]
         });
         // add second pointer
-        sendBundle({
+        sendPointerBundle({
             sessionId: 2,
             alive: [1,2]
         });
@@ -628,7 +701,7 @@ QUnit.test("removes pointer from active list when pointer no longer active", fun
     client.connect();
     
     setTimeout(function(){
-        sendBundle({
+        sendPointerBundle({
             sessionId: 1,
             frameId: 1,
             alive: [1]
@@ -636,7 +709,7 @@ QUnit.test("removes pointer from active list when pointer no longer active", fun
         // pointer is now active per previous test
         // send a different pointer message too implicitly remove the previous one
         // sessionId 1 => 2
-        sendBundle({
+        sendPointerBundle({
             sessionId: 2,
             frameId: 2,
             alive: [2]
@@ -663,7 +736,7 @@ QUnit.test("updates existing pointer in the pointer list, if it already exists",
     
     setTimeout(function(){
         
-        sendBundle({
+        sendPointerBundle({
             frameId: 1,
             alive: [sessionId],
             sessionId: sessionId,
@@ -671,7 +744,7 @@ QUnit.test("updates existing pointer in the pointer list, if it already exists",
             yPos: 1 
         });
         // change
-        sendBundle({
+        sendPointerBundle({
             frameId: 2,
             alive: [sessionId],
             sessionId: sessionId,
@@ -705,7 +778,7 @@ QUnit.test("sets optional pointer parameters on creation", function(assert) {
     
     setTimeout(function(){
         
-        sendBundle({
+        sendPointerBundle({
             xSpeed: 11,
             ySpeed: 12,
             pressureSpeed: 9,
@@ -733,7 +806,7 @@ QUnit.test("sets optional pointer parameters on update", function(assert) {
     
     setTimeout(function(){
         
-        sendBundle({
+        sendPointerBundle({
             xSpeed: 11,
             ySpeed: 12,
             pressureSpeed: 9,
@@ -741,7 +814,7 @@ QUnit.test("sets optional pointer parameters on update", function(assert) {
             pressureAccel: 10,
         });
         
-        sendBundle({
+        sendPointerBundle({
             xSpeed: 110,
             ySpeed: 120,
             pressureSpeed: 90,
@@ -766,13 +839,35 @@ QUnit.test("return only pointers from the currently set frame source", function(
     client.connect();
     
     setTimeout(function(){
-        sendBundle();
-        sendBundle({
+        sendPointerBundle();
+        sendPointerBundle({
             source: "new-source",
             sessionId: 22
         });
         QUnit.strictEqual(client.getTuioPointers().length, 1);
         QUnit.strictEqual(client.getTuioPointers()[0].getSessionId(), 22);
+        asyncDone();
+    }, 10);
+});
+    
+QUnit.test("adds token to active list when token alive", function(assert) {
+    
+    var asyncDone = assert.async();
+    
+    client.connect();
+    
+    setTimeout(function(){
+        server.send(getFrameBuffer());
+        server.send(getTokenBuffer({
+            sessionId: 10
+        }));
+        QUnit.equal(client.getTuioTokens().length, 0,
+                "list of active tokens is not empty");
+        server.send(getAliveBuffer([10]));
+        QUnit.equal(client.getTuioTokens().length, 1,
+                    "current token not added to the active list");
+        QUnit.equal(client.getTuioTokens()[0].getSessionId(), 10,
+                        "getTuioTokens returned wrong token");
         asyncDone();
     }, 10);
 });

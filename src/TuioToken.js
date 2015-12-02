@@ -29,7 +29,15 @@ Tuio.Token = Tuio.Component.extend({
     },
     getUserId: function() {
         return this.userId;
-    }
+    },
+    setTypeUserId: function(tu_id) {
+        var arrayBuffer = new ArrayBuffer(4),
+            bufferView = new DataView(arrayBuffer);
+        
+        bufferView.setUint32(0, tu_id);
+        this.typeId = bufferView.getUint16(0);
+        this.userId = bufferView.getUint16(2);
+    },
 }, { 
     fromToken: function(ttok) {
         return new Tuio.Token({

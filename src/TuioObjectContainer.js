@@ -9,6 +9,7 @@ if (typeof require !== "undefined") {
 Tuio.ObjectContainer = Tuio.Model.extend({
     
     pointer: null,
+    token: null,
     sessionId: null,
     startTime: null,
     currentTime: null,
@@ -69,6 +70,14 @@ Tuio.ObjectContainer = Tuio.Model.extend({
     
     setTuioPointer: function(pointer) {
         this.pointer = pointer;
+    },
+                                         
+    getTuioToken: function() {
+        return this.token;
+    },
+    
+    setTuioToken: function(token) {
+        this.token = token;
     },
                                          
     getTuioPointer: function() {
