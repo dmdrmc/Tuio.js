@@ -59,15 +59,7 @@ Tuio.Pointer = Tuio.Component.extend({
     getPressureAccel: function() {
         return this.pressureAccel;
     },
-    setTypeUserId: function(tu_id) {
-        var arrayBuffer = new ArrayBuffer(4),
-            bufferView = new DataView(arrayBuffer);
         
-        bufferView.setUint32(0, tu_id);
-        this.typeId = bufferView.getUint16(0);
-        this.userId = bufferView.getUint16(2);
-    },
-    
     update: function(params) {
         params = params || {};
         
