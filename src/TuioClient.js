@@ -30,7 +30,7 @@ Tuio.Client = Tuio.Model.extend({
     //tuio2/any-component
     aliveComponentList: null,
     //tuio2 objects
-    objectList: null,
+    objectContainerList: null,
     frameObjects: null,
     //
     freeCursorList: null,
@@ -62,7 +62,7 @@ Tuio.Client = Tuio.Model.extend({
         //tuio2/any-component
         this.aliveComponentList = [];
         //tuio2/ptr
-        this.objectList = [];
+        this.objectContainerList = [];
         this.frameObjects = [];
         //
         this.freeCursorList = [];
@@ -108,8 +108,11 @@ Tuio.Client = Tuio.Model.extend({
         return this.connected;
     },
 
-    getTuioObjects: function() {
-        return _.clone(this.objectList);
+    getTuioObjects: function(version1) {
+        if (version1 === true)
+            return _.clone(this.objectList);
+        
+        return _.clone(this.objectContainerList);
     },
 
     getTuioCursors: function() {
@@ -120,7 +123,7 @@ Tuio.Client = Tuio.Model.extend({
         var self = this,
             pointers = [];
         
-        this.objectList.forEach(function(object) {
+        this.objectContainerList.forEach(function(object) {
             if (object.pointer &&
                     self.frameSource && 
                     object.getTuioSource().getSourceString() === self.frameSource.getSourceString()) {
@@ -135,7 +138,7 @@ Tuio.Client = Tuio.Model.extend({
         var self = this,
             tokens = [];
         
-        this.objectList.forEach(function(object) {
+        this.objectContainerList.forEach(function(object) {
             if (object.token &&
                     self.frameSource && 
                     object.getTuioSource().getSourceString() === self.frameSource.getSourceString()) {
@@ -147,7 +150,7 @@ Tuio.Client = Tuio.Model.extend({
     },
 
     getTuioObject: function(sid) {
-        return this.objectList[sid];
+        return this.objectContainerList[sid];
     },
 
     getTuioCursor: function(sid) {
@@ -272,7 +275,7 @@ Tuio.Client = Tuio.Model.extend({
         }
         
         //mark all pointers not in the alive list for removal
-        this.objectList.forEach(function(object){
+        this.objectContainerList.forEach(function(object){
             if (self.aliveComponentList.indexOf(object.getSessionId()) === -1) {
                 object.remove(self.frameTime);
                 self.frameObjects.push(object);
@@ -282,12 +285,12 @@ Tuio.Client = Tuio.Model.extend({
         this.frameObjects.forEach(function(frameObject){
             switch(frameObject.getTuioState()) {
                 case Tuio.TUIO_ADDED:
-                    self.objectList.push(frameObject);
+                    self.objectContainerList.push(frameObject);
                     break;
                 case Tuio.TUIO_REMOVED:
-                    var removeIndex = self.objectList.indexOf(frameObject);
+                    var removeIndex = self.objectContainerList.indexOf(frameObject);
                     if (removeIndex !== -1) {
-                        self.objectList.splice(removeIndex, 1);
+                        self.objectContainerList.splice(removeIndex, 1);
                     }
                     break;
             }
@@ -443,7 +446,7 @@ Tuio.Client = Tuio.Model.extend({
         });
         
         if (typeof wantedPointer === "undefined") {
-            this.objectList.forEach(function(activePointer){
+            this.objectContainerList.forEach(function(activePointer){
                 if (typeof activePointer.getTuioSource() !== "undefined" &&
                         activePointer.getTuioSource().getSourceId() === sourceId &&
                         activePointer.getSessionId() === sessionId) {
@@ -519,7 +522,7 @@ Tuio.Client = Tuio.Model.extend({
         this.aliveObjectList = _.difference(this.aliveObjectList, this.newObjectList);
 
         for (var i = 0, max = this.aliveObjectList.length; i < max; i++) {
-            removeObject = this.objectList[this.aliveObjectList[i]];
+            removeObject = this.objectContainerList[this.aliveObjectList[i]];
             if (removeObject) {
                 removeObject.remove(this.currentTime);
                 this.frameObjects.push(removeObject);

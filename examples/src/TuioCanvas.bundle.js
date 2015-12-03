@@ -48,10 +48,10 @@ TuioCanvas.Main = (function() {
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         var cursors = client.getTuioCursors(),
-	   pointers = client.getTuioPointers(),
-        objects = client.getTuioObjects();
+            pointers = client.getTuioPointers(),
+            objects = client.getTuioObjects();
 
-        for(var i in pointers) {
+        for (var i in pointers) {
             drawCursor(pointers[i]);
         }
 
@@ -76,6 +76,11 @@ TuioCanvas.Main = (function() {
         );
         context.closePath();
         context.fill();
+        
+        context.fillStyle = "#000000";
+        context.fillText(cursor.getUserId(), 
+                            cursor.getScreenX(screenW),
+                            cursor.getScreenY(screenH));
     },
 
     drawObject = function(object) {
@@ -20069,7 +20074,7 @@ Tuio.Client = Tuio.Model.extend({
     //tuio2/any-component
     aliveComponentList: null,
     //tuio2 objects
-    objectList: null,
+    objectContainerList: null,
     frameObjects: null,
     //
     freeCursorList: null,
@@ -20079,6 +20084,7 @@ Tuio.Client = Tuio.Model.extend({
     oscReceiver: null,
     // last frame info
     frameSource: null,
+    sourceCount: null,
     frameTime: null,
     lateFrame: null,
 
@@ -20100,7 +20106,7 @@ Tuio.Client = Tuio.Model.extend({
         //tuio2/any-component
         this.aliveComponentList = [];
         //tuio2/ptr
-        this.objectList = [];
+        this.objectContainerList = [];
         this.frameObjects = [];
         //
         this.freeCursorList = [];
@@ -20111,6 +20117,7 @@ Tuio.Client = Tuio.Model.extend({
             url: this.host
         });
         //
+        this.sourceCount = 0;
         this.lateFrame = false;
 
         _.bindAll(this, "onConnect", "acceptBundle", "acceptMessage", "onDisconnect");
@@ -20145,8 +20152,11 @@ Tuio.Client = Tuio.Model.extend({
         return this.connected;
     },
 
-    getTuioObjects: function() {
-        return _.clone(this.objectList);
+    getTuioObjects: function(version1) {
+        if (version1 === true)
+            return _.clone(this.objectList);
+        
+        return _.clone(this.objectContainerList);
     },
 
     getTuioCursors: function() {
@@ -20154,18 +20164,37 @@ Tuio.Client = Tuio.Model.extend({
     },
     
     getTuioPointers: function() {
-        var pointers = [];
-        this.objectList.forEach(function(object) {
-            if (object.pointer) {
+        var self = this,
+            pointers = [];
+        
+        this.objectContainerList.forEach(function(object) {
+            if (object.pointer &&
+                    self.frameSource && 
+                    object.getTuioSource().getSourceString() === self.frameSource.getSourceString()) {
                 pointers.push(object.pointer);
             }
         });
         
         return pointers;
     },
+    
+    getTuioTokens: function() {
+        var self = this,
+            tokens = [];
+        
+        this.objectContainerList.forEach(function(object) {
+            if (object.token &&
+                    self.frameSource && 
+                    object.getTuioSource().getSourceString() === self.frameSource.getSourceString()) {
+                tokens.push(object.token);
+            }
+        });
+        
+        return tokens;
+    },
 
     getTuioObject: function(sid) {
-        return this.objectList[sid];
+        return this.objectContainerList[sid];
     },
 
     getTuioCursor: function(sid) {
@@ -20207,6 +20236,9 @@ Tuio.Client = Tuio.Model.extend({
                 break;
             case "/tuio2/ptr":
                 this.handlePointerMessage(messageArgs);
+                break;
+            case "/tuio2/tok":
+                this.handleTokenMessage(messageArgs);
                 break;
             case "/tuio2/alv":
                 this.handleAliveMessage(messageArgs);
@@ -20256,9 +20288,11 @@ Tuio.Client = Tuio.Model.extend({
             this.frameSource = new Tuio.Source({
                 frameId: frameId,
                 dimension: dimension,
-                sourceString: sourceString
+                sourceString: sourceString,
+                sourceId: this.sourceCount
             });
             this.sourceList[sourceString] = this.frameSource;
+            this.sourceCount += 1;
         }
         // time to set
         this.frameTime = new Tuio.Time.fromMilliseconds(timetag.native*1000);
@@ -20285,22 +20319,22 @@ Tuio.Client = Tuio.Model.extend({
         }
         
         //mark all pointers not in the alive list for removal
-        this.objectList.forEach(function(pointer){
-            if (self.aliveComponentList.indexOf(pointer.getSessionId()) === -1) {
-                pointer.remove(self.frameTime);
-                self.frameObjects.push(pointer);
+        this.objectContainerList.forEach(function(object){
+            if (self.aliveComponentList.indexOf(object.getSessionId()) === -1) {
+                object.remove(self.frameTime);
+                self.frameObjects.push(object);
             }
         });
         
-        this.frameObjects.forEach(function(framePointer){
-            switch(framePointer.getTuioState()) {
+        this.frameObjects.forEach(function(frameObject){
+            switch(frameObject.getTuioState()) {
                 case Tuio.TUIO_ADDED:
-                    self.objectList.push(framePointer);
+                    self.objectContainerList.push(frameObject);
                     break;
                 case Tuio.TUIO_REMOVED:
-                    var removeIndex = self.objectList.indexOf(framePointer);
+                    var removeIndex = self.objectContainerList.indexOf(frameObject);
                     if (removeIndex !== -1) {
-                        self.objectList.splice(removeIndex, 1);
+                        self.objectContainerList.splice(removeIndex, 1);
                     }
                     break;
             }
@@ -20332,6 +20366,7 @@ Tuio.Client = Tuio.Model.extend({
             pspeed = args[11],
             maccel = args[12],
             paccel = args[13],
+            object = this.obtainFrameObject(s_id),
             pointerUpdateParams = {
                 xp: xpos,
                 yp: ypos,
@@ -20347,24 +20382,11 @@ Tuio.Client = Tuio.Model.extend({
                 pa: paccel
             },
             pointerCreateParams = _.extend({}, pointerUpdateParams, {
-                si: s_id,
                 pi: -1,
-                source: this.frameSource
+                source: this.frameSource,
+                tobj: object
             }),
-            object,
             pointer;
-        
-        if (this.frameSource) {
-            object = this.getFrameObject(this.frameSource.getSourceId(), s_id);
-        }
-        if (typeof object === "undefined") {
-            object = new Tuio.ObjectContainer({
-                ttime: this.frameTime,
-                si: s_id,
-                src: this.frameSource
-            });
-            this.frameObjects.push(object);
-        }
         
         pointer = object.getTuioPointer();
         if (!pointer) {
@@ -20387,8 +20409,75 @@ Tuio.Client = Tuio.Model.extend({
         }
     },
     
+    handleTokenMessage: function(args) {
+        var s_id = args[0],
+            tu_id = args[1],
+            c_id = args[2],
+            xpos = args[3],
+            ypos = args[4],
+            angle = args[5],
+            xspeed = args[9],
+            yspeed = args[10],
+            rspeed = args[11],
+            maccel = args[12],
+            raccel = args[13],
+            object = this.obtainFrameObject(s_id),
+            tokenUpdateParams = {
+                xp: xpos,
+                yp: ypos,
+                a: angle,
+                ttime: this.frameTime,
+                xs: xspeed,
+                ys: yspeed,
+                rs: rspeed,
+                ma: maccel,
+                ra: raccel
+            },
+            tokenCreateParams = _.extend({}, tokenUpdateParams, {
+                sym: -1,
+                source: this.frameSource,
+                tobj: object
+            }),
+            token;
+        
+        token = object.getTuioToken();
+        if (!token) {
+            token = new Tuio.Token(tokenCreateParams);
+            token.setTypeUserId(tu_id);
+            object.setTuioToken(token);
+        }
+        else if (token.getX() !== xpos ||
+                    token.getY() !== ypos ||
+                    token.getAngle() !== angle ||
+                    token.getXSpeed() !== xspeed ||
+                    token.getYSpeed() !== yspeed ||
+                    token.getRotationSpeed() !== rspeed ||
+                    token.getRotationAccel() !== raccel ||
+                    token.getMotionAccel() !== maccel) {
+            token.update(tokenUpdateParams);
+        }
+    },    
+    
     getFrameObjects: function() {
         return this.frameObjects;
+    },
+    
+    obtainFrameObject: function(sessionId) {
+        var object;
+        
+        if (this.frameSource) {
+            object = this.getFrameObject(this.frameSource.getSourceId(), sessionId);
+        }
+        if (typeof object === "undefined") {
+            object = new Tuio.ObjectContainer({
+                ttime: this.frameTime,
+                si: sessionId,
+                src: this.frameSource
+            });
+            this.frameObjects.push(object);
+        }
+        
+        return object;
     },
     
     getFrameObject: function(sourceId, sessionId) {
@@ -20401,7 +20490,7 @@ Tuio.Client = Tuio.Model.extend({
         });
         
         if (typeof wantedPointer === "undefined") {
-            this.objectList.forEach(function(activePointer){
+            this.objectContainerList.forEach(function(activePointer){
                 if (typeof activePointer.getTuioSource() !== "undefined" &&
                         activePointer.getTuioSource().getSourceId() === sourceId &&
                         activePointer.getSessionId() === sessionId) {
@@ -20477,7 +20566,7 @@ Tuio.Client = Tuio.Model.extend({
         this.aliveObjectList = _.difference(this.aliveObjectList, this.newObjectList);
 
         for (var i = 0, max = this.aliveObjectList.length; i < max; i++) {
-            removeObject = this.objectList[this.aliveObjectList[i]];
+            removeObject = this.objectContainerList[this.aliveObjectList[i]];
             if (removeObject) {
                 removeObject.remove(this.currentTime);
                 this.frameObjects.push(removeObject);
@@ -20781,6 +20870,75 @@ var Tuio = root.Tuio;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
+    Tuio.Container = require("./TuioContainer");
+}
+
+Tuio.Component = Tuio.Container.extend({
+    //reference to the object that contains the pointer
+    container: null,
+    angle: null,
+    rotationSpeed: null,
+    rotationAccel: null,
+    
+    initialize: function(params) {
+        params = params || {};
+        Tuio.Container.prototype.initialize.call(this, params);
+        
+        this.container = params.tobj;
+        this.angle = params.a;
+        this.rotationSpeed = params.rs || 0;
+        this.rotationAccel = params.ra || 0;
+    },
+    
+    update: function(params) {
+        Tuio.Container.prototype.update.call(this, params);
+        
+        this.angle = params.a;
+        this.rotationSpeed = params.rs;
+        this.rotationAccel = params.ra;
+    },
+
+    getContainingTuioObject: function() {
+        return this.container;
+    },
+    getSessionId: function() {
+        if (typeof this.container !== "undefined") {
+            return this.container.getSessionId();
+        }
+    },
+    getAngle: function() {
+        return this.angle;
+    },
+    getRotationSpeed: function() {
+        return this.rotationSpeed;
+    },
+    getRotationAccel: function() {
+        return this.rotationAccel;
+    },
+    
+    setTypeUserId: function(tu_id) {
+        var arrayBuffer = new ArrayBuffer(4),
+            bufferView = new DataView(arrayBuffer);
+        
+        bufferView.setUint32(0, tu_id);
+        this.typeId = bufferView.getUint16(0);
+        this.userId = bufferView.getUint16(2);
+    },
+}, {
+});
+    
+if (typeof exports !== "undefined") {
+    module.exports = Tuio.Component;
+}
+    
+}(this));
+},{"./Tuio":12,"./TuioContainer":15}],15:[function(require,module,exports){
+(function(root) {
+
+var Tuio = root.Tuio;
+
+if (typeof require !== "undefined") {
+    Tuio = require("./Tuio");
     Tuio.Point = require("./TuioPoint");
 }
 
@@ -20932,7 +21090,7 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":12,"./TuioPoint":18}],15:[function(require,module,exports){
+},{"./Tuio":12,"./TuioPoint":19}],16:[function(require,module,exports){
 (function(root) {
 
 var Tuio = root.Tuio;
@@ -20970,7 +21128,7 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":12,"./TuioContainer":14}],16:[function(require,module,exports){
+},{"./Tuio":12,"./TuioContainer":15}],17:[function(require,module,exports){
 (function(root) {
 
 var Tuio = root.Tuio;
@@ -21097,7 +21255,7 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":12,"./TuioContainer":14}],17:[function(require,module,exports){
+},{"./Tuio":12,"./TuioContainer":15}],18:[function(require,module,exports){
 (function(root) {
     
 var Tuio = root.Tuio;
@@ -21109,6 +21267,7 @@ if (typeof require !== "undefined") {
 Tuio.ObjectContainer = Tuio.Model.extend({
     
     pointer: null,
+    token: null,
     sessionId: null,
     startTime: null,
     currentTime: null,
@@ -21127,6 +21286,7 @@ Tuio.ObjectContainer = Tuio.Model.extend({
     
     remove: function(ttime) {
         this.removeTuioPointer(ttime);
+        this.removeTuioToken(ttime);
         this.state = Tuio.TUIO_REMOVED;
     },
     
@@ -21139,12 +21299,17 @@ Tuio.ObjectContainer = Tuio.Model.extend({
         if (this.pointer) {
             this.pointer.stop(ttime);
         }
+        if (this.token) {
+            this.token.stop(ttime);
+        }
         this.currentTime = ttime;
     },
     
     isMoving: function() {
-        return this.constainsTuioPointer() &&
-                    this.pointer.isMoving();
+        return (this.containsTuioPointer() &&
+                    this.pointer.isMoving()) ||
+                (this.containsTuioPointer() &&
+                    this.pointer.isMoving());
     },
     
     removeTuioPointer: function(ttime) {
@@ -21158,12 +21323,12 @@ Tuio.ObjectContainer = Tuio.Model.extend({
         this.pointer = null;
     },
     
-    constainsTuioPointer: function() {
+    containsTuioPointer: function() {
         return !!this.pointer;
     },
     
     containsNewTuioPointer: function() {
-        return this.constainsTuioPointer()
+        return this.containsTuioPointer()
                 && this.pointer.getTuioState() === Tuio.TUIO_ADDED;
     },
     
@@ -21173,6 +21338,34 @@ Tuio.ObjectContainer = Tuio.Model.extend({
                                          
     getTuioPointer: function() {
         return this.pointer;
+    },
+    
+    removeTuioToken: function(ttime) {
+        if (this.token) {
+            this.token.remove(ttime);
+        }
+        this.currentTime = ttime;
+    },
+    
+    deleteTuioToken: function() {
+        this.token = null;
+    },
+    
+    containsTuioToken: function() {
+        return !!this.token;
+    },
+    
+    containsNewTuioToken: function() {
+        return this.containsTuioToken()
+                && this.token.getTuioState() === Tuio.TUIO_ADDED;
+    },
+                                         
+    getTuioToken: function() {
+        return this.token;
+    },
+    
+    setTuioToken: function(token) {
+        this.token = token;
     },
     
     getSessionId: function() {
@@ -21205,7 +21398,7 @@ if (typeof exports !== "undefined") {
 }
     
 })(this);
-},{"./Tuio":12}],18:[function(require,module,exports){
+},{"./Tuio":12}],19:[function(require,module,exports){
 (function(root) {
 
 var Tuio = root.Tuio;
@@ -21312,47 +21505,41 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":12}],19:[function(require,module,exports){
+},{"./Tuio":12}],20:[function(require,module,exports){
 (function(root) {
 
 var Tuio = root.Tuio;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
-    Tuio.Container = require("./TuioContainer");
+    Tuio.Component = require("./TuioComponent");
 }
 
-Tuio.Pointer = Tuio.Container.extend({
+Tuio.Pointer = Tuio.Component.extend({
     pointerId: null,
     typeId: null,
     userId: null,
     componentId: null,
-    angle: null,
     shear: null,
     radius: null,
     pressure: null,
     pressureSpeed: null,
     pressureAccel: null,
-    source: null,
 
     initialize: function(params) {
         params = params || {};
-        Tuio.Container.prototype.initialize.call(this, params);
-
-        this.source = params.source;
+        Tuio.Component.prototype.initialize.call(this, params);
         
         this.pointerId = params.pi;
         this.typeId = params.ti
         this.userId = params.ui;
         this.componentId = params.ci;
-        this.angle = params.a;
         this.shear = params.sa;
         this.radius = params.r;
         this.pressure = params.p;
         this.pressureSpeed = params.ps;
         this.pressureAccel = params.pa;
     },
-
     getPointerId: function() {
         return this.pointerId;
     },
@@ -21364,9 +21551,6 @@ Tuio.Pointer = Tuio.Container.extend({
     },
     getComponentId: function() {
         return this.componentId;
-    },
-    getAngle: function() {
-        return this.angle;
     },
     getShear: function() {
         return this.shear;
@@ -21383,23 +21567,11 @@ Tuio.Pointer = Tuio.Container.extend({
     getPressureAccel: function() {
         return this.pressureAccel;
     },
-    getTuioSource: function() {
-        return this.source;
-    },
-    setTypeUserId: function(tu_id) {
-        var arrayBuffer = new ArrayBuffer(4),
-            bufferView = new DataView(arrayBuffer);
         
-        bufferView.setUint32(0, tu_id);
-        this.typeId = bufferView.getUint16(0);
-        this.userId = bufferView.getUint16(2);
-    },
-    
     update: function(params) {
         params = params || {};
         
-        Tuio.Container.prototype.update.call(this, params);
-        this.angle = params.a;
+        Tuio.Component.prototype.update.call(this, params);
         this.shear = params.sa;
         this.radius = params.r;
         this.pressure = params.p;
@@ -21409,7 +21581,6 @@ Tuio.Pointer = Tuio.Container.extend({
 }, { 
     fromPointer: function(tptr) {
         return new Tuio.Pointer({
-            si: tptr.getSessionId(),
             ti: tptr.getTypeId(),
             ui: tptr.getUserId(),
             pi: tptr.getPointerId(),
@@ -21419,7 +21590,8 @@ Tuio.Pointer = Tuio.Container.extend({
             a: tptr.getAngle(),
             sa: tptr.getShear(),
             r: tptr.getRadius(),
-            p: tptr.getPressure()
+            p: tptr.getPressure(),
+            tobj: tptr.getContainingTuioObject(),
         });
     }
 });
@@ -21429,7 +21601,7 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":12,"./TuioContainer":14}],20:[function(require,module,exports){
+},{"./Tuio":12,"./TuioComponent":14}],21:[function(require,module,exports){
 (function(root) {
 
 var Tuio = root.Tuio,
@@ -21528,7 +21700,7 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":12,"lodash":7}],21:[function(require,module,exports){
+},{"./Tuio":12,"lodash":7}],22:[function(require,module,exports){
 (function(root) {
 
 var Tuio = root.Tuio;
@@ -21669,4 +21841,58 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":12}]},{},[12,13,14,15,16,17,18,19,20,21,1]);
+},{"./Tuio":12}],23:[function(require,module,exports){
+(function(root) {
+
+var Tuio = root.Tuio;
+
+if (typeof require !== "undefined") {
+    Tuio = require("./Tuio");
+    Tuio.Component = require("./TuioComponent");
+}
+
+Tuio.Token = Tuio.Component.extend({
+    symbolId: null,
+    typeId: null,
+    userId: null,
+    
+    initialize: function(params) {
+        params = params || {};
+        Tuio.Component.prototype.initialize.call(this, params);
+        
+        this.symbolId = params.sym;
+        this.typeId = params.ti;
+        this.userId = params.ui;
+    },
+    
+    getSymbolId: function() {
+        return this.symbolId;
+    },
+    getTypeId: function() {
+        return this.typeId;
+    },
+    getUserId: function() {
+        return this.userId;
+    },
+}, { 
+    fromToken: function(ttok) {
+        return new Tuio.Token({
+            ti: ttok.getTypeId(),
+            ui: ttok.getUserId(),
+            sym: ttok.getSymbolId(),
+            xp: ttok.getX(),
+            yp: ttok.getY(),
+            rs: ttok.getRotationSpeed(),
+            ra: ttok.getRotationAccel(),
+            tobj: ttok.getContainingTuioObject(),
+            a: ttok.getAngle(),
+        });
+    }
+});
+    
+if (typeof exports !== "undefined") {
+    module.exports = Tuio.Token;
+}
+    
+}(this));
+},{"./Tuio":12,"./TuioComponent":14}]},{},[12,13,14,15,16,17,18,19,20,21,22,23,1]);
