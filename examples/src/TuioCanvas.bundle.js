@@ -76,11 +76,6 @@ TuioCanvas.Main = (function() {
         );
         context.closePath();
         context.fill();
-        
-        context.fillStyle = "#000000";
-        context.fillText(cursor.getUserId(), 
-                            cursor.getScreenX(screenW),
-                            cursor.getScreenY(screenH));
     },
 
     drawObject = function(object) {
@@ -20153,10 +20148,7 @@ Tuio.Client = Tuio.Model.extend({
     },
 
     getTuioObjects: function(version1) {
-        if (version1 === true)
-            return _.clone(this.objectList);
-        
-        return _.clone(this.objectContainerList);
+        return _.clone(this.objectList);
     },
 
     getTuioCursors: function() {

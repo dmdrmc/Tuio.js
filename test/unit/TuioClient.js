@@ -635,7 +635,7 @@ QUnit.test("stores session id in the object, not pointer", function(assert) {
     
     setTimeout(function() {
         sendPointerBundle();
-        QUnit.strictEqual(client.getTuioObjects()[0].getSessionId(), 1);
+        QUnit.strictEqual(client.objectContainerList[0].getSessionId(), 1);
         
         asyncDone();
     }, 10);

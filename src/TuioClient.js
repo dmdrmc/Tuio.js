@@ -109,10 +109,7 @@ Tuio.Client = Tuio.Model.extend({
     },
 
     getTuioObjects: function(version1) {
-        if (version1 === true)
-            return _.clone(this.objectList);
-        
-        return _.clone(this.objectContainerList);
+        return _.clone(this.objectList);
     },
 
     getTuioCursors: function() {
