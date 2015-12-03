@@ -216,11 +216,13 @@ function sendPointerBundle(params) {
         ySpeed = params.ySpeed,
         pressureSpeed = params.pressureSpeed,
         pressureAccel = params.pressureAccel,
-        motionAccel = params.motionAccel;
+        motionAccel = params.motionAccel,
+        time = params.time;
     
     server.send(getFrameBuffer({
         frameId: frameId,
-        source: source
+        source: source,
+        time: time
     }));
     server.send(getPointerBuffer({
         sessionId: sessionId,
@@ -976,6 +978,25 @@ QUnit.test("return only tokens from the currently set frame source", function(as
         });
         QUnit.strictEqual(client.getTuioTokens().length, 1);
         QUnit.strictEqual(client.getTuioTokens()[0].getSessionId(), 22);
+        asyncDone();
+    }, 10);
+});
+    
+QUnit.test("triggers refresh event on tuio2 alive message", function(assert) {
+    
+    var asyncDone = assert.async(),
+        time = new Date().getTime(),
+        tuioTime = new Tuio.Time.fromMilliseconds(time*1000);
+    
+    client.on("refresh", function(tuioTimeOnRefresh){
+        QUnit.ok(tuioTimeOnRefresh.equals(tuioTime), "refresh time doesn't match frame time");
+    });
+    client.connect();
+    
+    setTimeout(function(){
+        sendPointerBundle({
+            time: time
+        });
         asyncDone();
     }, 10);
 });
