@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nomve/Tuio.js.svg?branch=master)](https://travis-ci.org/nomve/Tuio.js)
+
 # Tuio-extended.js
 
 This is a fork of [Tuio.js](https://github.com/fe9lix/Tuio.js), the original JavaScript implementation of the TUIO protocol.

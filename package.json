@@ -1,5 +1,5 @@
 {
-  "name": "Tuio.js",
+  "name": "Tuio-extended.js",
   "version": "0.1.0",
   "description": "Improvement of the original Tuio.js library to support basic features of the TUIO2 protocol. A small subset of the features is supported, and it is questionable if everything will be implemented.",
   "homepage": "http://fe9lix.github.com/Tuio.js/",
@@ -11,17 +11,16 @@
     }
   ],
   "main": "src/Tuio.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nomve/Tuio.js"
+  },
   "scripts": {
     "test": "karma start --single-run",
     "build:common": "browserify src/* -u src/server.js -o dist/Tuio.common.js --no-bundle-external",
     "build:canvas": "watchify src/* examples/src/TuioCanvas.js -u src/server.js -o examples/src/TuioCanvas.bundle.js -v"
   },
-  "licenses": [
-    {
-      "type": "GPL",
-      "url": "http://fe9lix.github.com/Tuio.js//blob/master/LICENSE-GPL"
-    }
-  ],
+  "license": "GPL",
   "dependencies": {
     "lodash": "~3.10.1",
     "osc": "~2.0.0",
