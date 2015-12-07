@@ -1,10 +1,16 @@
 {
   "name": "Tuio.js",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Improvement of the original Tuio.js library to support basic features of the TUIO2 protocol. A small subset of the features is supported, and it is questionable if everything will be implemented.",
   "homepage": "http://fe9lix.github.com/Tuio.js/",
-  "author": {
-    "name": "Felix Raab"
-  },
+  "author": "Felix Raab",
+  "contributors": [
+    {
+      "name": "Goran Kosutic",
+      "email": "kosutic.goran@gmail.com"
+    }
+  ],
+  "main": "src/Tuio.js",
   "scripts": {
     "test": "karma start --single-run",
     "build:common": "browserify src/* -u src/server.js -o dist/Tuio.common.js --no-bundle-external",

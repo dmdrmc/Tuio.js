@@ -20334,6 +20334,9 @@ Tuio.Client = Tuio.Model.extend({
         
         //end of frame
         this.frameObjects = [];
+        if (this.frameTime) {
+            this.trigger("refresh", Tuio.Time.fromTime(this.frameTime));   
+        }
     },
     
     getAliveComponents: function() {

@@ -282,10 +282,7 @@ Tuio.Client = Tuio.Model.extend({
     },
 
     getTuioObjects: function(version1) {
-        if (version1 === true)
-            return _.clone(this.objectList);
-        
-        return _.clone(this.objectContainerList);
+        return _.clone(this.objectList);
     },
 
     getTuioCursors: function() {
@@ -471,6 +468,9 @@ Tuio.Client = Tuio.Model.extend({
         
         //end of frame
         this.frameObjects = [];
+        if (this.frameTime) {
+            this.trigger("refresh", Tuio.Time.fromTime(this.frameTime));   
+        }
     },
     
     getAliveComponents: function() {
