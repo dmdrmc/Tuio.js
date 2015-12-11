@@ -5,6 +5,7 @@ var Tuio = root.Tuio;
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
     Tuio.Point = require("./TuioPoint");
+    Tuio.Time = require("./TuioTime");
 }
 
 Tuio.Container = Tuio.Point.extend({

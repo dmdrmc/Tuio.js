@@ -4,6 +4,7 @@ var Tuio = root.Tuio;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
+    Tuio.Time = require("./TuioTime");
 }
 
 Tuio.Point = Tuio.Model.extend({

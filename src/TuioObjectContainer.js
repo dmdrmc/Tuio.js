@@ -4,6 +4,7 @@ var Tuio = root.Tuio;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
+    Tuio.Time = require("./TuioTime");
 }
     
 Tuio.ObjectContainer = Tuio.Model.extend({
@@ -70,8 +71,8 @@ Tuio.ObjectContainer = Tuio.Model.extend({
     },
     
     containsNewTuioPointer: function() {
-        return this.containsTuioPointer()
-                && this.pointer.getTuioState() === Tuio.TUIO_ADDED;
+        return this.containsTuioPointer() &&
+                this.pointer.getTuioState() === Tuio.TUIO_ADDED;
     },
     
     setTuioPointer: function(pointer) {
@@ -98,8 +99,8 @@ Tuio.ObjectContainer = Tuio.Model.extend({
     },
     
     containsNewTuioToken: function() {
-        return this.containsTuioToken()
-                && this.token.getTuioState() === Tuio.TUIO_ADDED;
+        return this.containsTuioToken() &&
+                this.token.getTuioState() === Tuio.TUIO_ADDED;
     },
                                          
     getTuioToken: function() {
