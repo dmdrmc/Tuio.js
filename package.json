@@ -16,7 +16,7 @@
     "url": "https://github.com/nomve/Tuio.js"
   },
   "scripts": {
-    "test": "./node_modules/.bin/karma start --single-run --browsers Chrome,Firefox",
+    "test": "./node_modules/.bin/karma start --single-run",
     "build:common": "browserify src/* -u src/server.js -o dist/Tuio.common.js --no-bundle-external",
     "build:canvas": "watchify src/* examples/src/TuioCanvas.js -u src/server.js -o examples/src/TuioCanvas.bundle.js -v"
   },
