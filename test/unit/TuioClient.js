@@ -6,7 +6,7 @@ var Tuio = require("../../src/Tuio");
 Tuio.Client = require("../../src/TuioClient");
 var client,
     server,
-    mockSocket = require('WebMocket'),
+    mockSocket = require('webmocket'),
     osc = require("osc/dist/osc-browser");
     
 function writeOscMessage(address, args) {
