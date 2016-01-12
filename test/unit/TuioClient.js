@@ -6,6 +6,7 @@ var Tuio = require("../../src/Tuio");
 Tuio.Client = require("../../src/TuioClient");
 var client,
     server,
+    mockSocket = require('webmocket'),
     osc = require("osc/dist/osc-browser");
     
 function writeOscMessage(address, args) {
@@ -265,11 +266,11 @@ function sendTokenBundle(params) {
 
 QUnit.module("Tuio.Client", {
     setup: function() {
-        window.WebSocket = MockWebSocket;
+        window.WebSocket = mockSocket.WebMocket;
         client = new Tuio.Client({
             host: "test-url"
         });
-        server = new MockServer("test-url"); 
+        server = new mockSocket.MocketServer("test-url");
     },
 
     teardown: function() {

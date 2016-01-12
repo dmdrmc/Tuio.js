@@ -88,9 +88,9 @@ Tuio.Client = Tuio.Model.extend({
         this.currentTime = new Tuio.Time();
         this.currentTime.reset();
         
-        this.oscReceiver.open();
         this.oscReceiver.on("open", this.onConnect);
         this.oscReceiver.on("close", this.onDisconnect);
+        this.oscReceiver.open();
     },
 
     onConnect: function() {

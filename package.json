@@ -1,6 +1,6 @@
 {
   "name": "tuio-extended",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Improvement of the original Tuio.js library to support basic features of the TUIO2 protocol. A small subset of the features is supported, and it is questionable if everything will be implemented.",
   "homepage": "http://fe9lix.github.com/Tuio.js/",
   "author": "Felix Raab",
@@ -16,11 +16,11 @@
     "url": "https://github.com/nomve/Tuio.js"
   },
   "scripts": {
-    "test": "karma start --single-run",
+    "test": "./node_modules/.bin/karma start --single-run",
     "build:common": "browserify src/* -u src/server.js -o dist/Tuio.common.js --no-bundle-external",
     "build:canvas": "watchify src/* examples/src/TuioCanvas.js -u src/server.js -o examples/src/TuioCanvas.bundle.js -v"
   },
-  "license": "GPL",
+  "license": "GPL-3.0",
   "dependencies": {
     "lodash": "~3.10.1",
     "osc": "~2.0.0",
@@ -30,13 +30,13 @@
     "browserify": "^12.0.1",
     "karma": "^0.13.15",
     "karma-browserify": "^4.4.0",
-    "karma-mocha-reporter": "^1.1.1",
-    "karma-phantomjs-launcher": "^0.2.1",
     "karma-chrome-launcher": "^0.2.1",
+    "karma-firefox-launcher": "^0.1.7",
+    "karma-mocha-reporter": "^1.1.1",
     "karma-qunit": "^0.1.8",
-    "mock-socket": "^0.8.2",
     "phantomjs": "^1.9.18",
     "qunitjs": "^1.20.0",
-    "watchify": "^3.6.0"
+    "watchify": "^3.6.0",
+    "webmocket": "^1.0.0"
   }
 }
