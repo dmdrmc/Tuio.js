@@ -36,6 +36,11 @@ var tuio = (function() {
     onSocketConnection = function(webSocket) {
         webSocketClients.push(webSocket);
         console.log("Websocket client connected");
+        webSocket.on("close", function() {
+            var indexOf = webSocketClients.indexOf(webSocket);
+            webSocketClients.splice(indexOf, 1);
+            console.log("Websocket client disconnected");
+        });
     };
 
     return {
