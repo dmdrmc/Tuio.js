@@ -10,7 +10,7 @@ Because the [reference C++](https://github.com/mkalten/TUIO20_CPP) implementatio
 
 * it decodes the TUIO OSC messages using [osc.js](https://github.com/colinbdclark/osc.js), instead of using a local Node server
 * the socket.io connection from the browser to a local Node server that relays the UDP messages to the browser is no longer needed
-* if necessary for the original TUIO (v1) protocol, it is still available using `src/server.js`. Internally it uses the [ws package](https://github.com/websockets/ws) instead of socket.io
+* if necessary for the original TUIO (v1) protocol, the Node Server is still available using `src/server.js`. Internally it uses the [ws package](https://github.com/websockets/ws) instead of socket.io. Run it with: `node src/server.js`. It listens to `localhost:3333` for Tuio messages over UDP, and sends over `localhost:5000` for WebSocket connections.
 
 ## License
 Licensed under the GPL license.
