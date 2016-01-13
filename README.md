@@ -12,6 +12,12 @@ Because the [reference C++](https://github.com/mkalten/TUIO20_CPP) implementatio
 * the socket.io connection from the browser to a local Node server that relays the UDP messages to the browser is no longer needed
 * if necessary for the original TUIO (v1) protocol, the Node Server is still available using `src/server.js`. Internally it uses the [ws package](https://github.com/websockets/ws) instead of socket.io. Run it with: `node src/server.js`. It listens to `localhost:3333` for Tuio messages over UDP, and sends over `localhost:5000` for WebSocket connections.
 
+## Installation
+Install with npm
+```
+npm install tuio-extended
+```
+
 ## Usage with Tuio2
 The usage is the same as in [the original library](https://github.com/fe9lix/Tuio.js), but it offers two new methods in `TuioClient` for retrieving the two new input types. The one significant difference is that they give an array of pointer of token objects, instead of a JavaScript object. For instance:
 ```
