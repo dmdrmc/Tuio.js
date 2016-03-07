@@ -180,6 +180,10 @@ var Tuio = root.Tuio,
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
+    Tuio.Time = require('./TuioTime');
+    Tuio.Source = require('./TuioSource');
+    Tuio.ObjectContainer = require('./TuioObjectContainer');
+    Tuio.Pointer = require('./TuioPointer');
     _ = require("lodash");
     osc = require("osc/dist/osc-browser");
 }
@@ -204,7 +208,6 @@ Tuio.Client = Tuio.Model.extend({
     aliveComponentList: null,
     //tuio2 objects
     objectContainerList: null,
-    frameObjects: null,
     //
     freeCursorList: null,
     maxCursorId: null,
@@ -257,9 +260,9 @@ Tuio.Client = Tuio.Model.extend({
         this.currentTime = new Tuio.Time();
         this.currentTime.reset();
         
-        this.oscReceiver.open();
         this.oscReceiver.on("open", this.onConnect);
         this.oscReceiver.on("close", this.onDisconnect);
+        this.oscReceiver.open();
     },
 
     onConnect: function() {
@@ -320,7 +323,7 @@ Tuio.Client = Tuio.Model.extend({
     },
 
     getTuioObject: function(sid) {
-        return this.objectContainerList[sid];
+        return this.objectList[sid];
     },
 
     getTuioCursor: function(sid) {
@@ -695,7 +698,7 @@ Tuio.Client = Tuio.Model.extend({
         this.aliveObjectList = _.difference(this.aliveObjectList, this.newObjectList);
 
         for (var i = 0, max = this.aliveObjectList.length; i < max; i++) {
-            removeObject = this.objectContainerList[this.aliveObjectList[i]];
+            removeObject = this.objectList[this.aliveObjectList[i]];
             if (removeObject) {
                 removeObject.remove(this.currentTime);
                 this.frameObjects.push(removeObject);
@@ -720,7 +723,6 @@ Tuio.Client = Tuio.Model.extend({
         } else if (Tuio.Time.getSessionTime().subtractTime(this.currentTime).getTotalMilliseconds() > 100) {
             this.currentTime = Tuio.Time.getSessionTime();
         }
-
         if (!lateFrame) {
             for (var i = 0, max = this.frameObjects.length; i < max; i++) {
                 tobj = this.frameObjects[i];
@@ -992,7 +994,7 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":1,"lodash":undefined,"osc/dist/osc-browser":undefined}],3:[function(require,module,exports){
+},{"./Tuio":1,"./TuioObjectContainer":7,"./TuioPointer":9,"./TuioSource":10,"./TuioTime":11,"lodash":undefined,"osc/dist/osc-browser":undefined}],3:[function(require,module,exports){
 (function(root) {
 
 var Tuio = root.Tuio;
@@ -1069,6 +1071,7 @@ var Tuio = root.Tuio;
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
     Tuio.Point = require("./TuioPoint");
+    Tuio.Time = require("./TuioTime");
 }
 
 Tuio.Container = Tuio.Point.extend({
@@ -1219,7 +1222,7 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":1,"./TuioPoint":8}],5:[function(require,module,exports){
+},{"./Tuio":1,"./TuioPoint":8,"./TuioTime":11}],5:[function(require,module,exports){
 (function(root) {
 
 var Tuio = root.Tuio;
@@ -1391,6 +1394,7 @@ var Tuio = root.Tuio;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
+    Tuio.Time = require("./TuioTime");
 }
     
 Tuio.ObjectContainer = Tuio.Model.extend({
@@ -1457,8 +1461,8 @@ Tuio.ObjectContainer = Tuio.Model.extend({
     },
     
     containsNewTuioPointer: function() {
-        return this.containsTuioPointer()
-                && this.pointer.getTuioState() === Tuio.TUIO_ADDED;
+        return this.containsTuioPointer() &&
+                this.pointer.getTuioState() === Tuio.TUIO_ADDED;
     },
     
     setTuioPointer: function(pointer) {
@@ -1485,8 +1489,8 @@ Tuio.ObjectContainer = Tuio.Model.extend({
     },
     
     containsNewTuioToken: function() {
-        return this.containsTuioToken()
-                && this.token.getTuioState() === Tuio.TUIO_ADDED;
+        return this.containsTuioToken() &&
+                this.token.getTuioState() === Tuio.TUIO_ADDED;
     },
                                          
     getTuioToken: function() {
@@ -1527,13 +1531,14 @@ if (typeof exports !== "undefined") {
 }
     
 })(this);
-},{"./Tuio":1}],8:[function(require,module,exports){
+},{"./Tuio":1,"./TuioTime":11}],8:[function(require,module,exports){
 (function(root) {
 
 var Tuio = root.Tuio;
 
 if (typeof require !== "undefined") {
     Tuio = require("./Tuio");
+    Tuio.Time = require("./TuioTime");
 }
 
 Tuio.Point = Tuio.Model.extend({
@@ -1634,7 +1639,7 @@ if (typeof exports !== "undefined") {
 }
     
 }(this));
-},{"./Tuio":1}],9:[function(require,module,exports){
+},{"./Tuio":1,"./TuioTime":11}],9:[function(require,module,exports){
 (function(root) {
 
 var Tuio = root.Tuio;
