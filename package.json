@@ -37,6 +37,6 @@
     "phantomjs": "^1.9.18",
     "qunitjs": "^1.20.0",
     "watchify": "^3.6.0",
-    "webmocket": "~1.0.0"
+    "webmocket": "1.0.0"
   }
 }
