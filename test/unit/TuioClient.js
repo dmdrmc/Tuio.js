@@ -1002,4 +1002,35 @@ QUnit.test("triggers refresh event on tuio2 alive message", function(assert) {
     }, 10);
 });
 
+QUnit.test("objects get properly removed when no longer active", function() {
+    var client = new Tuio.Client({
+            host: "http://localhost:5000"
+        }),
+        sessionId = 10,
+        symbolId = 8,
+        frameId = 2;
+    // /tuio/2Dobj alive s_id0 ... s_idN
+    var aliveArgs = [sessionId];
+    // /tuio/2Dobj set s i x y a X Y A m r
+    var setArgs = [sessionId, symbolId, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    // /tuio/2Dobj fseq f_id
+    var fseqArgs = [frameId];
+    
+    client.objectAlive(aliveArgs);
+    client.objectSet(setArgs);
+    client.objectFseq(fseqArgs);
+    
+    frameId += 1;
+    aliveArgs = [];
+    fseqArgs = [frameId];
+    
+    client.objectAlive(aliveArgs);
+    client.objectFseq(fseqArgs);        
+    
+    var activeObjects = client.getTuioObjects(),
+        activeObjectsKeys = Object.keys(activeObjects);
+    
+    QUnit.equal(activeObjectsKeys.length, 0, "wrong active object list length");        
+});
+
 })();
