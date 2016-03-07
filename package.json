@@ -1,6 +1,6 @@
 {
   "name": "tuio-extended",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Improvement of the original Tuio.js library to support basic features of the TUIO2 protocol. A small subset of the features is supported, and it is questionable if everything will be implemented.",
   "homepage": "http://fe9lix.github.com/Tuio.js/",
   "author": "Felix Raab",
