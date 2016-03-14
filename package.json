@@ -23,7 +23,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "lodash": "~3.10.1",
-    "osc": "~2.0.0",
+    "osc": "~2.0.3",
     "ws": "~0.8.0"
   },
   "devDependencies": {
